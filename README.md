@@ -50,10 +50,18 @@ Add `cppcheck` section to your `project.yml` specifyng configuration options:
   :options: []  
 ```
 
-### Run for whole project
+### Analyze whole project
 
 Run analysis for all project sources:
 
 ```shell
 $ ceedling cppcheck:all
+```
+
+### Analyze single file
+
+Run analysis for single source file:
+
+```shell
+$ ceedling cppcheck:<filename>
 ```

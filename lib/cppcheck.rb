@@ -1,6 +1,7 @@
 require 'ceedling/plugin'
 
 CPPCHECK_ROOT_NAME  = 'cppcheck'.freeze
+CPPCHECK_TASK_ROOT  = CPPCHECK_ROOT_NAME + ':'
 CPPCHECK_SYM        = CPPCHECK_ROOT_NAME.to_sym
 
 CPPCHECK_BUILD_PATH = File.join(PROJECT_BUILD_ROOT, CPPCHECK_ROOT_NAME)

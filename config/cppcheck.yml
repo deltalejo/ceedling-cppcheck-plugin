@@ -1,12 +1,10 @@
 ---
 :cppcheck:
-  :executable: cppcheck
-  :project: null
   :xml_report: false
   :html_report: false
   :addons: []
   :defines: []
   :undefines:
     - TEST
-  :arguments: []
+  :options: []
 ...

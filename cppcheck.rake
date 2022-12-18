@@ -1,10 +1,12 @@
 directory(CPPCHECK_BUILD_PATH)
+directory(CPPCHECK_ARTIFACTS_PATH)
 
 CLEAN.include(File.join(CPPCHECK_BUILD_PATH, '*'))
+CLEAN.include(File.join(CPPCHECK_ARTIFACTS_PATH, '*'))
 
 CLOBBER.include(File.join(CPPCHECK_BUILD_PATH, '**/*'))
 
-task :cppcheck_deps => [CPPCHECK_BUILD_PATH]
+task :cppcheck_deps => [CPPCHECK_BUILD_PATH, CPPCHECK_ARTIFACTS_PATH]
 
 task :cppcheck => [:cppcheck_deps] do
   Rake.application['cppcheck:all'].invoke
@@ -18,7 +20,15 @@ namespace :cppcheck do
       ['--enable=all'],
       COLLECTION_PATHS_SOURCE
     )
-    @ceedling[:tool_executor].exec(command[:line], command[:options])
+    results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+    
+    if @ceedling[CPPCHECK_SYM].config[:html_report]
+      command = @ceedling[:tool_executor].build_command_line(
+        TOOLS_CPPCHECK_HTMLREPORT,
+        @ceedling[CPPCHECK_SYM].html_report_options
+      )
+      @ceedling[:tool_executor].exec(command[:line], command[:options])
+    end
   end
   
   desc "Run analysis on single file ([*] real source file name, no path)."

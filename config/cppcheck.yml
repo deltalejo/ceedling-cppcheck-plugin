@@ -1,5 +1,15 @@
 ---
 :cppcheck:
+  :file_report: false
+  :xml_report: false
+  :html_report: false
+  :text:
+    :artifact_filename: null
+  :xml:
+    :artifact_filename: null
+  :html:
+    :artifact_filename: null
+    :title: null
   :addons: []
   :defines: []
   :undefines:

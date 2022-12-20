@@ -13,7 +13,7 @@ task :cppcheck => [:cppcheck_deps] do
 end
 
 namespace :cppcheck do
-  desc 'Run analysis on whole project.'
+  desc "Run whole project analysis (also just 'cppcheck' works)."
   task :all => [:cppcheck_deps] do
     command = @ceedling[:tool_executor].build_command_line(
       TOOLS_CPPCHECK,
@@ -31,7 +31,7 @@ namespace :cppcheck do
     end
   end
   
-  desc "Run analysis on single file ([*] real source file name, no path)."
+  desc "Run single file analysis ([*] real source file name, no path)."
   task :* do
     message = "\nOops! '#{CPPCHECK_ROOT_NAME}:*' isn't a real task. " +
               "Use a real source file name (no path) in place of the wildcard.\n" +

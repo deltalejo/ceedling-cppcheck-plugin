@@ -1,8 +1,10 @@
 require 'ceedling/plugin'
+require 'cppcheck_defaults'
 
-CPPCHECK_ROOT_NAME  = 'cppcheck'.freeze
-CPPCHECK_TASK_ROOT  = CPPCHECK_ROOT_NAME + ':'
-CPPCHECK_SYM        = CPPCHECK_ROOT_NAME.to_sym
+CPPCHECK_ROOT_NAME      = 'cppcheck'.freeze
+CPPCHECK_TASK_ROOT      = CPPCHECK_ROOT_NAME + ':'
+CPPCHECK_SYM            = CPPCHECK_ROOT_NAME.to_sym
+CPPCHECK_HTMLREPORT_SYM = CPPCHECK_ROOT_NAME + '_htmlreport'
 
 CPPCHECK_BUILD_PATH = File.join(PROJECT_BUILD_ROOT, CPPCHECK_ROOT_NAME)
 CPPCHECK_ARTIFACTS_PATH = File.join(PROJECT_BUILD_ARTIFACTS_ROOT, CPPCHECK_ROOT_NAME)
@@ -12,8 +14,18 @@ CPPCHECK_ARTIFACTS_FILE_XML = File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(C
 
 class Cppcheck < Plugin
   def setup
-    @config = @ceedling[:setupinator].config_hash[CPPCHECK_SYM]
-    @tool = @ceedling[:setupinator].config_hash[:tools][CPPCHECK_SYM]
+    project_config = @ceedling[:setupinator].config_hash
+    cppcheck_defaults = {
+      :tools => {
+        :cppcheck => DEFAULT_CPPCHECK_TOOL,
+        :cppcheck_htmlreport => DEFAULT_CPPCHECK_HTMLREPORT_TOOL
+      }
+    }
+    @ceedling[:configurator_builder].populate_defaults(project_config, cppcheck_defaults)
+    
+    @config = project_config[CPPCHECK_SYM]
+    @tool = project_config[:tools][CPPCHECK_SYM]
+    @htmlreport_tool = project_config[:tools][CPPCHECK_HTMLREPORT_SYM]
     
     if @config[:html_report] && (!@config[:file_report] || !@config[:xml_report])
       raise 'File and XML reports must be enabled when asking for HTML report.'
@@ -48,6 +60,14 @@ class Cppcheck < Plugin
     end
     
     @tool[:arguments] << '${1}'
+    
+    config = {
+      :tools => {
+        :cppcheck => @tool,
+        :cppcheck_htmlreport => @htmlreport_tool
+      }
+    }
+    @ceedling[:configurator].build_supplement(project_config, config)
   end
   
   def config

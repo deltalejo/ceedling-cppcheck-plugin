@@ -18,10 +18,3 @@ DEFAULT_CPPCHECK_HTMLREPORT_TOOL = {
   :optional => false.freeze,
   :arguments => [].freeze
 }
-
-def get_default_config
-  return :tools => {
-    :cppcheck => DEFAULT_CPPCHECK_TOOL,
-    :cppcheck_htmlreport => DEFAULT_CPPCHECK_HTMLREPORT_TOOL
-  }
-end

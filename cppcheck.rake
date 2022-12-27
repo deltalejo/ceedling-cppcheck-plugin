@@ -8,9 +8,7 @@ CLOBBER.include(File.join(CPPCHECK_BUILD_PATH, '**/*'))
 
 task :cppcheck_deps => [CPPCHECK_BUILD_PATH, CPPCHECK_ARTIFACTS_PATH]
 
-task :cppcheck => [:cppcheck_deps] do
-  Rake.application['cppcheck:all'].invoke
-end
+task :cppcheck => ['cppcheck:all']
 
 namespace :cppcheck do
   desc "Run whole project analysis (also just 'cppcheck' works)."
@@ -41,16 +39,17 @@ namespace :cppcheck do
   end
 end
 
-rule(/^#{CPPCHECK_TASK_ROOT}\S+$/ => [
+rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
   proc do |tn|
     name = tn.sub(/^#{CPPCHECK_TASK_ROOT}/, '')
     @ceedling[:file_finder].find_source_file(name, :error)
   end
-]) do |t|
-  command = @ceedling[:tool_executor].build_command_line(
-    TOOLS_CPPCHECK,
-    [],
-    t.source
-  )
-  @ceedling[:tool_executor].exec(command[:line], command[:options])
-end
+  ] do |t|
+    Rake.application['cppcheck_deps'].invoke
+    command = @ceedling[:tool_executor].build_command_line(
+      TOOLS_CPPCHECK,
+      [],
+      t.source
+    )
+    @ceedling[:tool_executor].exec(command[:line], command[:options])
+  end

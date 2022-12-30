@@ -18,14 +18,20 @@ namespace :cppcheck do
       ['--enable=all'],
       COLLECTION_PATHS_SOURCE
     )
+    @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)
+    @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
     results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+    @ceedling[:streaminator].stdout_puts(results[:output])
     
     if @ceedling[CPPCHECK_SYM].config[:html_report]
       command = @ceedling[:tool_executor].build_command_line(
         TOOLS_CPPCHECK_HTMLREPORT,
         @ceedling[CPPCHECK_SYM].html_report_options
       )
-      @ceedling[:tool_executor].exec(command[:line], command[:options])
+      @ceedling[:streaminator].stdout_puts("Cppcheck HTML resport...", Verbosity::NORMAL)
+      @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
+      results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+      @ceedling[:streaminator].stdout_puts(results[:output])
     end
   end
   
@@ -51,5 +57,8 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
       [],
       t.source
     )
-    @ceedling[:tool_executor].exec(command[:line], command[:options])
+    @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)
+    @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
+    results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+    @ceedling[:streaminator].stdout_puts(results[:output])
   end

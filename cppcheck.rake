@@ -7,31 +7,47 @@ CLEAN.include(File.join(CPPCHECK_ARTIFACTS_PATH, '*'))
 CLOBBER.include(File.join(CPPCHECK_BUILD_PATH, '**/*'))
 
 task :cppcheck_deps => [CPPCHECK_BUILD_PATH, CPPCHECK_ARTIFACTS_PATH]
-
 task :cppcheck => ['cppcheck:all']
 
 namespace :cppcheck do
   desc "Run whole project analysis (also just 'cppcheck' works)."
   task :all => [:cppcheck_deps] do
-    command = @ceedling[:tool_executor].build_command_line(
-      TOOLS_CPPCHECK,
-      ['--enable=all'],
-      COLLECTION_PATHS_SOURCE
-    )
-    @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)
-    @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
-    results = @ceedling[:tool_executor].exec(command[:line], command[:options])
-    @ceedling[:streaminator].stdout_puts(results[:output])
-    
-    if @ceedling[CPPCHECK_SYM].config[:html_report]
+    if CPPCHECK_REPORTS&.include?('text')
       command = @ceedling[:tool_executor].build_command_line(
-        TOOLS_CPPCHECK_HTMLREPORT,
-        @ceedling[CPPCHECK_SYM].html_report_options
+        TOOLS_CPPCHECK,
+        ['--quiet', '--enable=all'],
+        COLLECTION_PATHS_SOURCE
       )
-      @ceedling[:streaminator].stdout_puts("Cppcheck HTML resport...", Verbosity::NORMAL)
+      @ceedling[:streaminator].stdout_puts("Creating Cppcheck text report...", Verbosity::NORMAL)
       @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
       results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+      
+      File.open(CPPCHECK_TEXT_ARTIFACT_FILENAME, "w") do |fd|
+        fd.write(results[:output])
+      end
       @ceedling[:streaminator].stdout_puts(results[:output])
+    end
+    
+    if ['xml', 'html'].any? {|report| CPPCHECK_REPORTS&.include?(report)}
+      command = @ceedling[:tool_executor].build_command_line(
+        TOOLS_CPPCHECK,
+        ['--quiet', '--enable=all', '--xml'],
+        COLLECTION_PATHS_SOURCE
+      )
+      @ceedling[:streaminator].stdout_puts("Creating Cppcheck xml report...", Verbosity::NORMAL)
+      @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
+      results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+      
+      File.open(CPPCHECK_XML_ARTIFACT_FILENAME, "w") do |fd|
+        fd.write(results[:output])
+      end
+      
+      if CPPCHECK_REPORTS&.include?('html')
+        command = @ceedling[:tool_executor].build_command_line(TOOLS_CPPCHECK_HTMLREPORT, [])
+        @ceedling[:streaminator].stdout_puts("Creating Cppcheck html report...", Verbosity::NORMAL)
+        @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
+        @ceedling[:tool_executor].exec(command[:line], command[:options])
+      end
     end
   end
   
@@ -51,10 +67,10 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
     @ceedling[:file_finder].find_source_file(name, :error)
   end
   ] do |t|
-    Rake.application['cppcheck_deps'].invoke
+    @ceedling[:rake_wrapper][:cppcheck_deps].invoke
     command = @ceedling[:tool_executor].build_command_line(
       TOOLS_CPPCHECK,
-      [],
+      ['--quiet'],
       t.source
     )
     @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)

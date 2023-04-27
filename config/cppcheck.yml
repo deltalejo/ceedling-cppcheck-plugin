@@ -1,16 +1,22 @@
 ---
 :cppcheck:
-  :file_report: false
-  :xml_report: false
-  :html_report: false
-  :text:
-    :artifact_filename: null
-  :xml:
-    :artifact_filename: null
-  :html:
-    :artifact_filename: null
-    :title: null
+  :reports:
+    - text
+  :text_artifact_filename: null
+  :xml_artifact_filename: null
+  :html_artifact_filename: null
+  :html_title: null
+  :platform: null
+  :template: null
+  :standard: null
+  :inline_suppressions: false
+  :enable_checks: []
+  :disable_checks: []
   :addons: []
+  :includes: []
+  :libraries: []
+  :rules: []
+  :suppressions: []
   :defines: []
   :undefines:
     - TEST

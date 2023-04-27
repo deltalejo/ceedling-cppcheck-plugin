@@ -11,7 +11,7 @@ CPPCHECK_ARTIFACTS_PATH      = File.join(PROJECT_BUILD_ARTIFACTS_ROOT, CPPCHECK_
 
 CPPCHECK_ARTIFACTS_FILE_TEXT = File.join(CPPCHECK_ARTIFACTS_PATH, 'CppcheckResults.txt')
 CPPCHECK_ARTIFACTS_FILE_XML  = File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(CPPCHECK_ARTIFACTS_FILE_TEXT, '.*') + '.xml')
-CPPCHECK_ARTIFACTS_FILE_HTML = File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(CPPCHECK_ARTIFACTS_FILE_TEXT, '.*') + '.html')
+CPPCHECK_ARTIFACTS_DIR_HTML  = File.join(CPPCHECK_ARTIFACTS_PATH, 'html')
 
 class Cppcheck < Plugin
   def setup
@@ -30,7 +30,7 @@ class Cppcheck < Plugin
     
     @config[:text_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_TEXT
     @config[:xml_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_XML
-    @config[:html_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_HTML
+    @config[:html_artifact_dirname] ||= CPPCHECK_ARTIFACTS_DIR_HTML
     
     unless @config[:platform].nil? || @config[:platform].empty?
       @cppcheck[:arguments] << "--platform=#{@config[:platform]}"
@@ -89,7 +89,7 @@ class Cppcheck < Plugin
     @cppcheck[:arguments] << '${1}'
     
     @cppcheck_htmlreport[:arguments] << "--file=#{@config[:xml_artifact_filename]}"
-    @cppcheck_htmlreport[:arguments] << "--report-dir=#{File.join(CPPCHECK_ARTIFACTS_PATH, 'html')}"
+    @cppcheck_htmlreport[:arguments] << "--report-dir=#{@config[:html_artifact_dirname]}"
     @cppcheck_htmlreport[:arguments] << "--source-dir=#{PROJECT_ROOT}"
     unless @config[:html_title].nil? || @config[:html_title].empty?
       @cppcheck_htmlreport[:arguments] << "--title=#{@config[:html_title]}"

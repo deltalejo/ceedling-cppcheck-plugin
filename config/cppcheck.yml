@@ -1,13 +1,12 @@
 ---
 :cppcheck:
-  :reports:
-    - text
+  :reports: []
   :text_artifact_filename: null
   :xml_artifact_filename: null
   :html_artifact_dirname: null
+  :template: null
   :html_title: null
   :platform: null
-  :template: null
   :standard: null
   :inline_suppressions: false
   :enable_checks: []

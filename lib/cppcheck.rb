@@ -28,6 +28,7 @@ class Cppcheck < Plugin
     @cppcheck = project_config[:tools][CPPCHECK_SYM]
     @cppcheck_htmlreport = project_config[:tools][CPPCHECK_HTMLREPORT_SYM]
     
+    @config[:reports] = ['text'] if @config[:reports].nil? || @config[:reports].empty?
     @config[:text_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_TEXT
     @config[:xml_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_XML
     @config[:html_artifact_dirname] ||= CPPCHECK_ARTIFACTS_DIR_HTML

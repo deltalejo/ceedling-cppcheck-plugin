@@ -1,7 +1,7 @@
 DEFAULT_CPPCHECK_TOOL = {
   :executable => (ENV['CPPCHECK'].nil? ? FilePathUtils.os_executable_ext('cppcheck') : ENV['CPPCHECK'].split[0]).freeze,
   :name => 'default_cppcheck'.freeze,
-  :stderr_redirect => StdErrRedirect::NONE.freeze,
+  :stderr_redirect => StdErrRedirect::AUTO.freeze,
   :background_exec => BackgroundExec::NONE.freeze,
   :optional => false.freeze,
   :arguments => [

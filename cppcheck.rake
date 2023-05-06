@@ -22,7 +22,8 @@ namespace :cppcheck do
       @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
       results = @ceedling[:tool_executor].exec(command[:line], command[:options])
       
-      File.open(CPPCHECK_TEXT_ARTIFACT_FILENAME, "w") do |fd|
+      text_artifact_filename = @ceedling[:cppcheck].form_text_artifact_filepath(CPPCHECK_TEXT_ARTIFACT_FILENAME)
+      File.open(text_artifact_filename, "w") do |fd|
         fd.write(results[:output])
       end
       @ceedling[:streaminator].stdout_puts(results[:output])
@@ -38,7 +39,8 @@ namespace :cppcheck do
       @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
       results = @ceedling[:tool_executor].exec(command[:line], command[:options])
       
-      File.open(CPPCHECK_XML_ARTIFACT_FILENAME, "w") do |fd|
+      xml_artifact_filename = @ceedling[:cppcheck].form_xml_artifact_filepath(CPPCHECK_XML_ARTIFACT_FILENAME)
+      File.open(xml_artifact_filename, "w") do |fd|
         fd.write(results[:output])
       end
       

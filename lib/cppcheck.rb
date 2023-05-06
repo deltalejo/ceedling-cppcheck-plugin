@@ -8,10 +8,10 @@ CPPCHECK_HTMLREPORT_SYM      = (CPPCHECK_ROOT_NAME + '_htmlreport').to_sym
 
 CPPCHECK_BUILD_PATH          = File.join(PROJECT_BUILD_ROOT, CPPCHECK_ROOT_NAME)
 CPPCHECK_ARTIFACTS_PATH      = File.join(PROJECT_BUILD_ARTIFACTS_ROOT, CPPCHECK_ROOT_NAME)
+CPPCHECK_ARTIFACTS_HTML_PATH = File.join(CPPCHECK_ARTIFACTS_PATH, 'html')
 
-CPPCHECK_ARTIFACTS_FILE_TEXT = File.join(CPPCHECK_ARTIFACTS_PATH, 'CppcheckResults.txt')
-CPPCHECK_ARTIFACTS_FILE_XML  = File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(CPPCHECK_ARTIFACTS_FILE_TEXT, '.*') + '.xml')
-CPPCHECK_ARTIFACTS_DIR_HTML  = File.join(CPPCHECK_ARTIFACTS_PATH, 'html')
+CPPCHECK_ARTIFACTS_FILE_TEXT = 'CppcheckReport.txt'
+CPPCHECK_ARTIFACTS_FILE_XML  = File.basename(CPPCHECK_ARTIFACTS_FILE_TEXT).ext('.xml')
 
 class Cppcheck < Plugin
   def setup
@@ -31,7 +31,6 @@ class Cppcheck < Plugin
     @config[:reports] = ['text'] if @config[:reports].nil? || @config[:reports].empty?
     @config[:text_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_TEXT
     @config[:xml_artifact_filename] ||= CPPCHECK_ARTIFACTS_FILE_XML
-    @config[:html_artifact_dirname] ||= CPPCHECK_ARTIFACTS_DIR_HTML
     
     unless @config[:platform].nil? || @config[:platform].empty?
       @cppcheck[:arguments] << "--platform=#{@config[:platform]}"
@@ -89,8 +88,10 @@ class Cppcheck < Plugin
     
     @cppcheck[:arguments] << '${1}'
     
-    @cppcheck_htmlreport[:arguments] << "--file=#{@config[:xml_artifact_filename]}"
-    @cppcheck_htmlreport[:arguments] << "--report-dir=#{@config[:html_artifact_dirname]}"
+    xml_artifact_filename = form_xml_artifact_filepath(@config[:xml_artifact_filename])
+    
+    @cppcheck_htmlreport[:arguments] << "--file=#{xml_artifact_filename}"
+    @cppcheck_htmlreport[:arguments] << "--report-dir=#{CPPCHECK_ARTIFACTS_HTML_PATH}"
     @cppcheck_htmlreport[:arguments] << "--source-dir=#{PROJECT_ROOT}"
     unless @config[:html_title].nil? || @config[:html_title].empty?
       @cppcheck_htmlreport[:arguments] << "--title=#{@config[:html_title]}"
@@ -101,5 +102,13 @@ class Cppcheck < Plugin
       :cppcheck_htmlreport => @cppcheck_htmlreport
     }
     @ceedling[:configurator].build_supplement(project_config, {:cppcheck => @config, :tools => tools})
+  end
+  
+  def form_text_artifact_filepath(filename)
+    return File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(filename).ext('.txt'))
+  end
+  
+  def form_xml_artifact_filepath(filename)
+    return File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(filename).ext('.xml'))
   end
 end

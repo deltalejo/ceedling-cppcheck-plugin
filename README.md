@@ -265,3 +265,5 @@ Run analysis for single source file:
 ```shell
 $ ceedling cppcheck:<filename>
 ```
+
+*Note: This will enable all coding style checks invoking Cppcheck with the option `--enable=style`.*

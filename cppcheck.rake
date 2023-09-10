@@ -72,7 +72,7 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
     @ceedling[:rake_wrapper][:cppcheck_deps].invoke
     command = @ceedling[:tool_executor].build_command_line(
       TOOLS_CPPCHECK,
-      ['--quiet'],
+      ['--quiet', '--enable=style'],
       t.source
     )
     @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)

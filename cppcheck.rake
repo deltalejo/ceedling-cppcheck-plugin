@@ -12,10 +12,15 @@ task :cppcheck => ['cppcheck:all']
 namespace :cppcheck do
   desc "Run whole project analysis (also just 'cppcheck' works)."
   task :all => [:cppcheck_deps] do
+    check_level = @ceedling[CPPCHECK_SYM].config[:check_level]
+    check_level = 'exhaustive' if check_level.nil? || check_level.empty?
+    
+    extra_params = ['--quiet', '--enable=all', "--check-level=#{check_level}"]
+    
     if CPPCHECK_REPORTS&.include?('text')
       command = @ceedling[:tool_executor].build_command_line(
         TOOLS_CPPCHECK,
-        ['--quiet', '--enable=all'],
+        extra_params,
         COLLECTION_PATHS_SOURCE
       )
       @ceedling[:streaminator].stdout_puts("Creating Cppcheck text report...", Verbosity::NORMAL)
@@ -32,7 +37,7 @@ namespace :cppcheck do
     if ['xml', 'html'].any? {|report| CPPCHECK_REPORTS&.include?(report)}
       command = @ceedling[:tool_executor].build_command_line(
         TOOLS_CPPCHECK,
-        ['--quiet', '--enable=all', '--xml'],
+        extra_params + ['--xml'],
         COLLECTION_PATHS_SOURCE
       )
       @ceedling[:streaminator].stdout_puts("Creating Cppcheck xml report...", Verbosity::NORMAL)
@@ -69,10 +74,16 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
     @ceedling[:file_finder].find_source_file(name, :error)
   end
   ] do |t|
+    enable_checks = @ceedling[CPPCHECK_SYM].config[:enable_checks]
+    enable_checks = ['style'] if enable_checks.nil? || enable_checks.empty?
+    
+    extra_params = ['--quiet', "--enable=#{enable_checks.join(',')}"]
+    
     @ceedling[:rake_wrapper][:cppcheck_deps].invoke
+    
     command = @ceedling[:tool_executor].build_command_line(
       TOOLS_CPPCHECK,
-      ['--quiet', '--enable=style'],
+      extra_params,
       t.source
     )
     @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)

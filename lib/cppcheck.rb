@@ -14,6 +14,8 @@ CPPCHECK_ARTIFACTS_FILE_TEXT = 'CppcheckReport.txt'
 CPPCHECK_ARTIFACTS_FILE_XML  = File.basename(CPPCHECK_ARTIFACTS_FILE_TEXT).ext('.xml')
 
 class Cppcheck < Plugin
+  attr_reader :config
+  
   def setup
     project_config = @ceedling[:setupinator].config_hash
     cppcheck_defaults = {
@@ -45,10 +47,6 @@ class Cppcheck < Plugin
     end
     
     @cppcheck[:arguments] << "--inline-suppr" if @config[:inline_suppressions] == true
-    
-    unless @config[:enable_checks].nil? || @config[:enable_checks].empty?
-      @cppcheck[:arguments] << "--enable=#{@config[:enable_checks].join(',')}"
-    end
     
     unless @config[:disable_checks].nil? || @config[:disable_checks].empty?
       @cppcheck[:arguments] << "--disable=#{@config[:disable_checks].join(',')}"

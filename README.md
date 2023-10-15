@@ -3,6 +3,29 @@
 Add [Ceedling](https://github.com/ThrowTheSwitch/Ceedling) task for analyzing
 code with [Cppcheck](http://cppcheck.net/).
 
+<!-- TOC -->
+
+- [Installation](#installation)
+- [Enable the plugin](#enable-the-plugin)
+- [Configuration](#configuration)
+	- [Reports](#reports)
+	- [Preprocessor defines](#preprocessor-defines)
+	- [Includes](#includes)
+	- [Platform](#platform)
+	- [Standard](#standard)
+	- [Check Level](#check-level)
+	- [Addons](#addons)
+	- [Checks](#checks)
+	- [Suppressions](#suppressions)
+	- [Library configuration](#library-configuration)
+	- [Rules](#rules)
+	- [Extra options](#extra-options)
+- [Usage](#usage)
+	- [Analyze whole project](#analyze-whole-project)
+	- [Analyze single file](#analyze-single-file)
+
+<!-- /TOC -->
+
 ## Installation
 
 Clone this into Ceedling's plugin folder of your current project.
@@ -145,6 +168,23 @@ Specify C/C++ language standard.
   :standard: c99
 ```
 
+### Check Level
+
+Specify the check level to be used for
+[whole project analysis](#analyze-whole-project).
+
+- *normal*
+- *exhaustive*
+
+By default *exhaustive* will be used.
+
+```yaml
+:cppcheck:
+  :check_level: normal
+```
+
+Single file analysis uses Cppcheck's default. i.e. *normal*.
+
 ### Addons
 
 Addons to be run.
@@ -158,7 +198,9 @@ Addons to be run.
 
 #### MISRA with rule texts file
 
-Locate your rules text file or copy it to your project. e.g.: `<your-project>/misra.txt` and create the addon file `misra.json` inside your project:
+Locate your rules text file or copy it to your project.
+e.g.: `<your-project>/misra.txt` and create the addon file `misra.json` inside
+your project:
 
 ##### **`misra.json`**
 ```json
@@ -186,6 +228,9 @@ Enable additional checks:
     - performance
     - portability
 ```
+
+*Note: These are only enabled for single file analysis.*
+*Whole project analysis always enable all checks.*
 
 Disable individual checks:
 
@@ -256,7 +301,7 @@ Run analysis for all project sources:
 $ ceedling cppcheck:all
 ```
 
-*Note: This will enable all checks invoking Cppcheck with the option `--enable=all`.*
+*Note: Analysis is run with* all *checks enabled.*
 
 ### Analyze single file
 
@@ -266,4 +311,5 @@ Run analysis for single source file:
 $ ceedling cppcheck:<filename>
 ```
 
-*Note: This will enable all coding style checks invoking Cppcheck with the option `--enable=style`.*
+*Note: Analysis will run with the checks in [`:enable_checks`](#checks) list enabled*
+*or with* style *check if none given.*

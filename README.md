@@ -9,14 +9,23 @@ code with [Cppcheck](http://cppcheck.net/).
 - [Enable the plugin](#enable-the-plugin)
 - [Configuration](#configuration)
 	- [Reports](#reports)
+		- [Text](#text)
+		- [XML](#xml)
+		- [HTML](#html)
 	- [Preprocessor defines](#preprocessor-defines)
+		- [Define](#define)
+		- [Undefine](#undefine)
 	- [Includes](#includes)
 	- [Platform](#platform)
 	- [Standard](#standard)
 	- [Check Level](#check-level)
 	- [Addons](#addons)
+		- [MISRA with rule texts file](#misra-with-rule-texts-file)
 	- [Checks](#checks)
 	- [Suppressions](#suppressions)
+		- [Inline](#inline)
+		- [List Files](#list-files)
+		- [Command Line](#command-line)
 	- [Library configuration](#library-configuration)
 	- [Rules](#rules)
 	- [Extra options](#extra-options)
@@ -116,7 +125,7 @@ Artifact directory and HTML title can be configured:
 
 ### Preprocessor defines
 
-#### Define names:
+#### Define
 
 ```yaml
 :cppcheck:
@@ -126,7 +135,7 @@ Artifact directory and HTML title can be configured:
     - C=1
 ```
 
-#### Undefine names:
+#### Undefine
 
 ```yaml
 :cppcheck:
@@ -243,6 +252,8 @@ Disable individual checks:
 
 ### Suppressions
 
+#### Inline
+
 Inline suppressions are disabled by default, they can be enabled with:
 
 ```yaml
@@ -250,7 +261,41 @@ Inline suppressions are disabled by default, they can be enabled with:
   :inline_suppressions: true
 ```
 
-Command line suppressions can be added also:
+#### List Files
+
+Suppressions files can be used by giving the search paths and/or files in the
+`:paths` and `:files` sections of  your `project.yml` respectively.
+e.g.:
+
+```yaml
+:paths:
+  :cppcheck:
+    - suppressions/
+    - source/*/suppressions/
+
+:files:
+  :cppcheck:
+    - suppressions.xml
+```
+
+Both XML and text files are supported, and for the latter, the file extension
+can be configured. The default is `.txt`.
+e.g.:
+
+```yaml
+:extension:
+  :cppcheck: .txt
+```
+
+The files that will ultimately be used can be verified with:
+
+```bash
+ceedling files:cppcheck
+```
+
+#### Command Line
+
+Command line suppressions can also be added:
 
 ```yaml
 :cppcheck:

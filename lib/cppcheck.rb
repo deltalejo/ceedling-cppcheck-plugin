@@ -68,6 +68,12 @@ class Cppcheck < Plugin
       @cppcheck[:arguments] << "--rule=#{rule}"
     end
     
+    suppressions = collect_suppressions(@ceedling[:configurator].project_config_hash)
+    suppressions&.each do |suppression|
+      option = suppression.end_with?('.xml')? '--suppress-xml' : '--suppressions-list'
+      @cppcheck[:arguments] << "#{option}=#{suppression}"
+    end
+    
     @config[:suppressions]&.each do |suppression|
       @cppcheck[:arguments] << "--suppress=#{suppression}"
     end
@@ -95,11 +101,17 @@ class Cppcheck < Plugin
       @cppcheck_htmlreport[:arguments] << "--title=#{@config[:html_title]}"
     end
     
-    tools = {
-      :cppcheck => @cppcheck,
-      :cppcheck_htmlreport => @cppcheck_htmlreport
-    }
-    @ceedling[:configurator].build_supplement(project_config, {:cppcheck => @config, :tools => tools})
+    @ceedling[:configurator].build_supplement(
+      project_config,
+      {
+        :cppcheck => @config,
+        :tools => {
+          :cppcheck => @cppcheck,
+          :cppcheck_htmlreport => @cppcheck_htmlreport
+        },
+        :collection_all_cppcheck => suppressions
+      }
+    )
   end
   
   def form_text_artifact_filepath(filename)
@@ -108,5 +120,22 @@ class Cppcheck < Plugin
   
   def form_xml_artifact_filepath(filename)
     return File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(filename).ext('.xml'))
+  end
+  
+  private
+  
+  def collect_suppressions(in_hash)
+    all_suppressions = @ceedling[:file_wrapper].instantiate_file_list
+    in_hash[:collection_paths_cppcheck].each do |path|
+      if File.exists?(path) and not File.directory?(path)
+        all_suppressions.include( path )
+      else
+        all_suppressions.include( File.join(path, '*.xml') )
+        all_suppressions.include( File.join(path, "*#{in_hash[:extension_cppcheck]}") )
+      end
+    end
+    @ceedling[:file_system_utils].revise_file_list( all_suppressions, in_hash[:files_cppcheck] )
+
+    return all_suppressions
   end
 end

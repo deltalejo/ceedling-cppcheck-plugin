@@ -73,21 +73,30 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
     name = tn.sub(/^#{CPPCHECK_TASK_ROOT}/, '')
     @ceedling[:file_finder].find_source_file(name, :error)
   end
-  ] do |t|
-    enable_checks = @ceedling[CPPCHECK_SYM].config[:enable_checks]
-    enable_checks = ['style'] if enable_checks.nil? || enable_checks.empty?
-    
-    extra_params = ['--quiet', "--enable=#{enable_checks.join(',')}"]
-    
-    @ceedling[:rake_wrapper][:cppcheck_deps].invoke
-    
-    command = @ceedling[:tool_executor].build_command_line(
-      TOOLS_CPPCHECK,
-      extra_params,
-      t.source
-    )
-    @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)
-    @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
-    results = @ceedling[:tool_executor].exec(command[:line], command[:options])
-    @ceedling[:streaminator].stdout_puts(results[:output])
+] do |t|
+  enable_checks = @ceedling[CPPCHECK_SYM].config[:enable_checks]
+  enable_checks = ['style'] if enable_checks.nil? || enable_checks.empty?
+  
+  extra_params = ['--quiet', "--enable=#{enable_checks.join(',')}"]
+  
+  @ceedling[:rake_wrapper][:cppcheck_deps].invoke
+  
+  command = @ceedling[:tool_executor].build_command_line(
+    TOOLS_CPPCHECK,
+    extra_params,
+    t.source
+  )
+  @ceedling[:streaminator].stdout_puts("Cppcheck...", Verbosity::NORMAL)
+  @ceedling[:streaminator].stdout_puts("Command: #{command}", Verbosity::DEBUG)
+  results = @ceedling[:tool_executor].exec(command[:line], command[:options])
+  @ceedling[:streaminator].stdout_puts(results[:output])
+end
+
+namespace :files do
+  desc 'List all collected Cppcheck suppressions files.'
+  task :cppcheck do
+    puts 'Cppcheck suppressions files:'
+    COLLECTION_ALL_CPPCHECK.sort.each { |filepath| puts " - #{filepath}" }
+    puts "file count: #{COLLECTION_ALL_CPPCHECK.size}"
   end
+end

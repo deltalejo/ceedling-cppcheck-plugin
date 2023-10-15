@@ -20,4 +20,13 @@
   :undefines:
     - TEST
   :options: []
+
+:extension:
+  :cppcheck: .txt
+
+:paths:
+  :cppcheck: []
+
+:files:
+  :cppcheck: []
 ...

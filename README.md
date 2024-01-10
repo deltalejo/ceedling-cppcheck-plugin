@@ -3,6 +3,9 @@
 Add [Ceedling](https://github.com/ThrowTheSwitch/Ceedling) task for analyzing
 code with [Cppcheck](http://cppcheck.net/).
 
+<!-- TOC ignore:true -->
+## Contents
+
 <!-- TOC -->
 
 - [Installation](#installation)

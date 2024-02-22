@@ -25,6 +25,9 @@ class Cppcheck < Plugin
       }
     }
     @ceedling[:configurator_builder].populate_defaults(project_config, cppcheck_defaults)
+    @ceedling[:configurator].replace_flattened_config(
+      collect_suppressions(@ceedling[:configurator].project_config_hash)
+    )
     
     @config = project_config[CPPCHECK_SYM]
     @cppcheck = project_config[:tools][CPPCHECK_SYM]
@@ -68,8 +71,7 @@ class Cppcheck < Plugin
       @cppcheck[:arguments] << "--rule=#{rule}"
     end
     
-    suppressions = collect_suppressions(@ceedling[:configurator].project_config_hash)
-    suppressions&.each do |suppression|
+    COLLECTION_ALL_CPPCHECK.each do |suppression|
       option = suppression.end_with?('.xml')? '--suppress-xml' : '--suppressions-list'
       @cppcheck[:arguments] << "#{option}=#{suppression}"
     end
@@ -108,8 +110,7 @@ class Cppcheck < Plugin
         :tools => {
           :cppcheck => @cppcheck,
           :cppcheck_htmlreport => @cppcheck_htmlreport
-        },
-        :collection_all_cppcheck => suppressions
+        }
       }
     )
   end
@@ -136,6 +137,6 @@ class Cppcheck < Plugin
     end
     @ceedling[:file_system_utils].revise_file_list( all_suppressions, in_hash[:files_cppcheck] )
 
-    return all_suppressions
+    return {:collection_all_cppcheck => all_suppressions}
   end
 end

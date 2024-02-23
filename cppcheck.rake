@@ -6,7 +6,7 @@ CLEAN.include(File.join(CPPCHECK_ARTIFACTS_PATH, '*'))
 
 CLOBBER.include(File.join(CPPCHECK_BUILD_PATH, '**/*'))
 
-<task :cppcheck_deps => [:directories, CPPCHECK_BUILD_PATH, CPPCHECK_ARTIFACTS_PATH]
+task :cppcheck_deps => [:directories, CPPCHECK_BUILD_PATH, CPPCHECK_ARTIFACTS_PATH]
 task :cppcheck => ['cppcheck:all']
 
 namespace :cppcheck do

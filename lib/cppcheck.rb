@@ -1,5 +1,4 @@
 require 'ceedling/plugin'
-require 'cppcheck_defaults'
 
 CPPCHECK_ROOT_NAME           = 'cppcheck'.freeze
 CPPCHECK_TASK_ROOT           = CPPCHECK_ROOT_NAME + ':'
@@ -18,13 +17,7 @@ class Cppcheck < Plugin
   
   def setup
     project_config = @ceedling[:setupinator].config_hash
-    cppcheck_defaults = {
-      :tools => {
-        :cppcheck => DEFAULT_CPPCHECK_TOOL,
-        :cppcheck_htmlreport => DEFAULT_CPPCHECK_HTMLREPORT_TOOL
-      }
-    }
-    @ceedling[:configurator_builder].populate_defaults(project_config, cppcheck_defaults)
+    
     @ceedling[:configurator].replace_flattened_config(
       collect_suppressions(@ceedling[:configurator].project_config_hash)
     )
@@ -98,7 +91,7 @@ class Cppcheck < Plugin
     
     @cppcheck_htmlreport[:arguments] << "--file=#{xml_artifact_filename}"
     @cppcheck_htmlreport[:arguments] << "--report-dir=#{CPPCHECK_ARTIFACTS_HTML_PATH}"
-    @cppcheck_htmlreport[:arguments] << "--source-dir=#{PROJECT_ROOT}"
+    @cppcheck_htmlreport[:arguments] << "--source-dir=."
     unless @config[:html_title].nil? || @config[:html_title].empty?
       @cppcheck_htmlreport[:arguments] << "--title=#{@config[:html_title]}"
     end
@@ -127,17 +120,21 @@ class Cppcheck < Plugin
   
   def collect_suppressions(in_hash)
     all_suppressions = @ceedling[:file_wrapper].instantiate_file_list
+    
     in_hash[:collection_paths_cppcheck].each do |path|
       if File.exists?(path) and not File.directory?(path)
-        all_suppressions.include( path )
+        all_suppressions.include(path)
       else
-        all_suppressions.include( File.join(path, '*.xml') )
-        all_suppressions.include( File.join(path, "*#{in_hash[:extension_cppcheck]}") )
+        all_suppressions.include(File.join(path, '*.xml') )
+        all_suppressions.include(File.join(path, "*#{in_hash[:extension_cppcheck]}"))
       end
     end
-    @ceedling[:file_system_utils].revise_file_list( all_suppressions, in_hash[:files_cppcheck] )
+    
+    @ceedling[:file_path_collection_utils].revise_filelist(all_suppressions, in_hash[:files_cppcheck])
 
-    return {:collection_all_cppcheck => all_suppressions}
+    return {
+      :collection_all_cppcheck => all_suppressions
+    }
   end
 end
 

@@ -23,15 +23,15 @@ namespace :cppcheck do
         extra_params,
         COLLECTION_PATHS_SOURCE
       )
-      @ceedling[:streaminator].stream_puts("Creating Cppcheck text report...", Verbosity::NORMAL)
-      @ceedling[:streaminator].stream_puts("Command: #{command}", Verbosity::DEBUG)
+      @ceedling[:loginator].log("Creating Cppcheck text report...", Verbosity::NORMAL)
+      @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
       results = @ceedling[:tool_executor].exec(command)
       
       text_artifact_filename = @ceedling[:cppcheck].form_text_artifact_filepath(CPPCHECK_TEXT_ARTIFACT_FILENAME)
       File.open(text_artifact_filename, "w") do |fd|
         fd.write(results[:output])
       end
-      @ceedling[:streaminator].stream_puts(results[:output])
+      @ceedling[:loginator].log(results[:output])
     end
     
     if ['xml', 'html'].any? {|report| CPPCHECK_REPORTS&.include?(report)}
@@ -40,8 +40,8 @@ namespace :cppcheck do
         extra_params + ['--xml'],
         COLLECTION_PATHS_SOURCE
       )
-      @ceedling[:streaminator].stream_puts("Creating Cppcheck xml report...", Verbosity::NORMAL)
-      @ceedling[:streaminator].stream_puts("Command: #{command}", Verbosity::DEBUG)
+      @ceedling[:loginator].log("Creating Cppcheck xml report...", Verbosity::NORMAL)
+      @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
       results = @ceedling[:tool_executor].exec(command)
       
       xml_artifact_filename = @ceedling[:cppcheck].form_xml_artifact_filepath(CPPCHECK_XML_ARTIFACT_FILENAME)
@@ -51,8 +51,8 @@ namespace :cppcheck do
       
       if CPPCHECK_REPORTS&.include?('html')
         command = @ceedling[:tool_executor].build_command_line(TOOLS_CPPCHECK_HTMLREPORT, [])
-        @ceedling[:streaminator].stream_puts("Creating Cppcheck html report...", Verbosity::NORMAL)
-        @ceedling[:streaminator].stream_puts("Command: #{command}", Verbosity::DEBUG)
+        @ceedling[:loginator].log("Creating Cppcheck html report...", Verbosity::NORMAL)
+        @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
         @ceedling[:tool_executor].exec(command)
       end
     end
@@ -64,7 +64,7 @@ namespace :cppcheck do
               "Use a real source file name (no path) in place of the wildcard.\n" +
               "Example: rake #{CPPCHECK_ROOT_NAME}:foo.c\n\n"
 
-    @ceedling[:streaminator].stream_puts( message )
+    @ceedling[:loginator].log( message )
   end
 end
 
@@ -86,10 +86,10 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
     extra_params,
     t.source
   )
-  @ceedling[:streaminator].stream_puts("Cppcheck...", Verbosity::NORMAL)
-  @ceedling[:streaminator].stream_puts("Command: #{command}", Verbosity::DEBUG)
+  @ceedling[:loginator].log("Cppcheck...", Verbosity::NORMAL)
+  @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
   results = @ceedling[:tool_executor].exec(command)
-  @ceedling[:streaminator].stream_puts(results[:output])
+  @ceedling[:loginator].log(results[:output])
 end
 
 namespace :files do

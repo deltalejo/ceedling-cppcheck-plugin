@@ -63,6 +63,10 @@ class Cppcheck < Plugin
       @cppcheck[:arguments] << "--include=#{include}"
     end
     
+    @config[:excludes]&.each do |exclude|
+      @cppcheck[:arguments] << "-i#{exclude}"
+    end
+    
     @config[:libraries]&.each do |library|
       @cppcheck[:arguments] << "--library=#{library}"
     end

@@ -19,6 +19,7 @@ code with [Cppcheck](http://cppcheck.net/).
 		- [Define](#define)
 		- [Undefine](#undefine)
 	- [Includes](#includes)
+	- [Excludes](#excludes)
 	- [Platform](#platform)
 	- [Standard](#standard)
 	- [Check Level](#check-level)
@@ -159,6 +160,17 @@ Force inclusion of files before checked files.
   :includes:
     - file1.h
     - file2.h
+```
+
+### Excludes
+
+Exclude files from the analysis.
+
+```yaml
+:cppcheck:
+  :excludes:
+    - file1.c
+    - file2.c
 ```
 
 ### Platform

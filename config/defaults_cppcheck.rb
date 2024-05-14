@@ -5,7 +5,7 @@ DEFAULT_CPPCHECK_TOOL = {
   :optional => false.freeze,
   :arguments => [
     '--cppcheck-build-dir=#{CPPCHECK_BUILD_PATH}'.freeze,
-    {'-I$' => 'COLLECTION_PATHS_INCLUDE'}.freeze
+    "-I\"${2}\"".freeze
   ].freeze
 }
 

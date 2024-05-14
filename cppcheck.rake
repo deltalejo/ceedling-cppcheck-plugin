@@ -21,7 +21,8 @@ namespace :cppcheck do
       command = @ceedling[:tool_executor].build_command_line(
         TOOLS_CPPCHECK,
         extra_params,
-        COLLECTION_PATHS_SOURCE
+        COLLECTION_PATHS_SOURCE,
+        COLLECTION_PATHS_INCLUDE
       )
       @ceedling[:loginator].log("Creating Cppcheck text report...", Verbosity::NORMAL)
       @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
@@ -38,7 +39,8 @@ namespace :cppcheck do
       command = @ceedling[:tool_executor].build_command_line(
         TOOLS_CPPCHECK,
         extra_params + ['--xml'],
-        COLLECTION_PATHS_SOURCE
+        COLLECTION_PATHS_SOURCE,
+        COLLECTION_PATHS_INCLUDE
       )
       @ceedling[:loginator].log("Creating Cppcheck xml report...", Verbosity::NORMAL)
       @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
@@ -84,7 +86,8 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
   command = @ceedling[:tool_executor].build_command_line(
     TOOLS_CPPCHECK,
     extra_params,
-    t.source
+    t.source,
+    COLLECTION_PATHS_INCLUDE
   )
   @ceedling[:loginator].log("Cppcheck...", Verbosity::NORMAL)
   @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)

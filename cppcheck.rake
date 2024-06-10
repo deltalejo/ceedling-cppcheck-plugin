@@ -15,13 +15,13 @@ namespace :cppcheck do
     @ceedling[CPPCHECK_SYM].generate_reports()
   end
   
-  desc "Run single file analysis ([*] real source file name, no path)."
+  desc "Run single file analysis ([*] source file name, no path)."
   task :* do
-    message = "\nOops! '#{CPPCHECK_ROOT_NAME}:*' isn't a real task. " +
+    message = "Oops! '#{CPPCHECK_ROOT_NAME}:*' isn't a real task. " +
               "Use a real source file name (no path) in place of the wildcard.\n" +
-              "Example: rake #{CPPCHECK_ROOT_NAME}:foo.c\n\n"
+              "Example: `ceedling #{CPPCHECK_ROOT_NAME}:foo.c`"
 
-    @ceedling[:loginator].log( message )
+    @ceedling[:loginator].log(message, Verbosity::ERRORS)
   end
 end
 
@@ -37,8 +37,10 @@ end
 namespace :files do
   desc 'List all collected Cppcheck suppressions files.'
   task :cppcheck do
-    puts 'Cppcheck suppressions files:'
-    COLLECTION_ALL_CPPCHECK.sort.each { |filepath| puts " - #{filepath}" }
-    puts "file count: #{COLLECTION_ALL_CPPCHECK.size}"
+    puts "Cppcheck suppressions files:#{' None' if COLLECTION_ALL_CPPCHECK.empty?}"
+    COLLECTION_ALL_CPPCHECK.sort.each do |filepath|
+      puts " - #{filepath}"
+    end
+    puts "file count: #{COLLECTION_ALL_CPPCHECK.size}" unless COLLECTION_ALL_CPPCHECK.empty?
   end
 end

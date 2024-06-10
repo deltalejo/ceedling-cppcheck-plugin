@@ -7,7 +7,7 @@
   :html_title: null
   :platform: null
   :standard: null
-  :check_level: exhaustive
+  :check_level: null
   :inline_suppressions: false
   :enable_checks: []
   :disable_checks: []

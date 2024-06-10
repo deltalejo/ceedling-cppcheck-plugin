@@ -12,52 +12,7 @@ task :cppcheck => ['cppcheck:all']
 namespace :cppcheck do
   desc "Run whole project analysis (also just 'cppcheck' works)."
   task :all => [:cppcheck_deps] do
-    check_level = @ceedling[CPPCHECK_SYM].config[:check_level]
-    check_level = 'exhaustive' if check_level.nil? || check_level.empty?
-    
-    extra_params = ['--quiet', '--enable=all', "--check-level=#{check_level}"]
-    
-    if CPPCHECK_REPORTS&.include?('text')
-      command = @ceedling[:tool_executor].build_command_line(
-        TOOLS_CPPCHECK,
-        extra_params,
-        COLLECTION_PATHS_SOURCE,
-        COLLECTION_PATHS_INCLUDE
-      )
-      @ceedling[:loginator].log("Creating Cppcheck text report...", Verbosity::NORMAL)
-      @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
-      results = @ceedling[:tool_executor].exec(command)
-      
-      text_artifact_filename = @ceedling[:cppcheck].form_text_artifact_filepath(CPPCHECK_TEXT_ARTIFACT_FILENAME)
-      File.open(text_artifact_filename, "w") do |fd|
-        fd.write(results[:output])
-      end
-      @ceedling[:loginator].log(results[:output])
-    end
-    
-    if ['xml', 'html'].any? {|report| CPPCHECK_REPORTS&.include?(report)}
-      command = @ceedling[:tool_executor].build_command_line(
-        TOOLS_CPPCHECK,
-        extra_params + ['--xml'],
-        COLLECTION_PATHS_SOURCE,
-        COLLECTION_PATHS_INCLUDE
-      )
-      @ceedling[:loginator].log("Creating Cppcheck xml report...", Verbosity::NORMAL)
-      @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
-      results = @ceedling[:tool_executor].exec(command)
-      
-      xml_artifact_filename = @ceedling[:cppcheck].form_xml_artifact_filepath(CPPCHECK_XML_ARTIFACT_FILENAME)
-      File.open(xml_artifact_filename, "w") do |fd|
-        fd.write(results[:output])
-      end
-      
-      if CPPCHECK_REPORTS&.include?('html')
-        command = @ceedling[:tool_executor].build_command_line(TOOLS_CPPCHECK_HTMLREPORT, [])
-        @ceedling[:loginator].log("Creating Cppcheck html report...", Verbosity::NORMAL)
-        @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
-        @ceedling[:tool_executor].exec(command)
-      end
-    end
+    @ceedling[CPPCHECK_SYM].generate_reports()
   end
   
   desc "Run single file analysis ([*] real source file name, no path)."
@@ -71,28 +26,12 @@ namespace :cppcheck do
 end
 
 rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
-  proc do |tn|
-    name = tn.sub(/^#{CPPCHECK_TASK_ROOT}/, '')
-    @ceedling[:file_finder].find_source_file(name, :error)
+  proc do |task_name|
+    name = task_name.sub(/^#{CPPCHECK_TASK_ROOT}/, '')
+    ['cppcheck_deps', @ceedling[:file_finder].find_source_file(name)]
   end
-] do |t|
-  enable_checks = @ceedling[CPPCHECK_SYM].config[:enable_checks]
-  enable_checks = ['style'] if enable_checks.nil? || enable_checks.empty?
-  
-  extra_params = ['--quiet', "--enable=#{enable_checks.join(',')}"]
-  
-  @ceedling[:rake_wrapper][:cppcheck_deps].invoke
-  
-  command = @ceedling[:tool_executor].build_command_line(
-    TOOLS_CPPCHECK,
-    extra_params,
-    t.source,
-    COLLECTION_PATHS_INCLUDE
-  )
-  @ceedling[:loginator].log("Cppcheck...", Verbosity::NORMAL)
-  @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
-  results = @ceedling[:tool_executor].exec(command)
-  @ceedling[:loginator].log(results[:output])
+] do |task|
+  @ceedling[CPPCHECK_SYM].analyze_file(task.sources[1])
 end
 
 namespace :files do

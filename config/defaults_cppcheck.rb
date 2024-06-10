@@ -4,8 +4,8 @@ DEFAULT_CPPCHECK_TOOL = {
   :stderr_redirect => StdErrRedirect::AUTO.freeze,
   :optional => false.freeze,
   :arguments => [
-    '--cppcheck-build-dir=#{CPPCHECK_BUILD_PATH}'.freeze,
-    "-I\"${2}\"".freeze
+    '-I"${2}"'.freeze,
+    '${1}'.freeze
   ].freeze
 }
 
@@ -13,7 +13,7 @@ DEFAULT_CPPCHECK_HTMLREPORT_TOOL = {
   :executable => (ENV['CPPCHECK_HTMLREPORT'].nil? ? FilePathUtils.os_executable_ext('cppcheck-htmlreport') : ENV['CPPCHECK_HTMLREPORT'].split[0]).freeze,
   :name => 'default_cppcheck_htmlreport'.freeze,
   :stderr_redirect => StdErrRedirect::NONE.freeze,
-  :optional => false.freeze,
+  :optional => true.freeze,
   :arguments => [].freeze
 }
 

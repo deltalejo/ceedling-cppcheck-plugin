@@ -32,7 +32,7 @@ code with [Cppcheck](http://cppcheck.net/).
 		- [Command Line](#command-line)
 	- [Library configuration](#library-configuration)
 	- [Rules](#rules)
-	- [Extra options](#extra-options)
+	- [Extra arguments](#extra-arguments)
 - [Usage](#usage)
 	- [Analyze whole project](#analyze-whole-project)
 	- [Analyze single file](#analyze-single-file)
@@ -340,13 +340,13 @@ Regular expression rules:
     - if \( p \) { free \( p \) ; }
 ```
 
-### Extra options
+### Extra arguments
 
-For things not covered above, add extra command line options:
+For things not covered above, add extra command line arguments:
 
 ```yaml
 :cppcheck:
-  :options:
+  :arguments:
     - --max-configs=<limit>
     - --suppressions-list=<file>
 ```

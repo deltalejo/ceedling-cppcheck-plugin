@@ -20,7 +20,7 @@
   :defines: []
   :undefines:
     - TEST
-  :options: []
+  :arguments: []
 
 :extension:
   :cppcheck: .txt

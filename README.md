@@ -97,7 +97,7 @@ Artifact file and output format can be configured:
 
 ```yaml
 :cppcheck:
-  :text_artifact_filename: path/to/CppcheckResults.txt
+  :text_artifact_filename: CppcheckResults.txt
   :template: gcc
 ```
 
@@ -109,7 +109,7 @@ Artifact file can be configured:
 
 ```yaml
 :cppcheck:
-  :xml_artifact_filename: path/to/CppcheckResults.xml
+  :xml_artifact_filename: CppcheckResults.xml
 ```
 
 #### HTML
@@ -118,7 +118,7 @@ Artifact directory and HTML title can be configured:
 
 ```yaml
 :cppcheck:
-  :html_artifact_dirname: path/to/CppcheckHtml
+  :html_artifact_dirname: CppcheckHtml
   :html_title: Awesome Project
 ```
 
@@ -194,20 +194,15 @@ Specify C/C++ language standard.
 
 ### Check Level
 
-Specify the check level to be used for
-[whole project analysis](#analyze-whole-project).
+Specify the check level to be used.
 
 - *normal*
 - *exhaustive*
 
-By default *exhaustive* will be used.
-
 ```yaml
 :cppcheck:
-  :check_level: normal
+  :check_level: exhaustive
 ```
-
-Single file analysis uses Cppcheck's default. i.e. *normal*.
 
 ### Addons
 
@@ -244,7 +239,8 @@ Enable the addon:
 
 ### Checks
 
-Enable additional checks:
+Enable additional checks.
+Default is *style*.
 
 ```yaml
 :cppcheck:
@@ -253,7 +249,7 @@ Enable additional checks:
     - portability
 ```
 
-*Note: These are only enabled for single file analysis.*
+*Note: These are only used for single file analysis.*
 *Whole project analysis always enable all checks.*
 
 Disable individual checks:
@@ -371,5 +367,4 @@ Run analysis for single source file:
 $ ceedling cppcheck:<filename>
 ```
 
-*Note: Analysis will run with the checks in [`:enable_checks`](#checks) list enabled*
-*or with* style *check if none given.*
+*Note: Analysis will run with the checks in [`:enable_checks`](#checks) list enabled.*

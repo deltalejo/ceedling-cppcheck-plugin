@@ -9,7 +9,8 @@
   :standard: null
   :check_level: null
   :inline_suppressions: false
-  :enable_checks: []
+  :enable_checks:
+    - style
   :disable_checks: []
   :addons: []
   :includes: []

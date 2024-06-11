@@ -51,7 +51,7 @@ class Cppcheck < Plugin
       args << "--enable=#{@config[:enable_checks].join(',')}"
     end
     
-    results = run(args, filepath, COLLECTION_PATHS_INCLUDE)
+    results = run(TOOLS_CPPCHECK, args, filepath, COLLECTION_PATHS_INCLUDE)
     @ceedling[:loginator].log(results[:output], Verbosity::COMPLAIN, LogLabels::NONE)
   end
   
@@ -99,6 +99,8 @@ class Cppcheck < Plugin
   
   def args_builder_common()
     args = []
+    
+    args << "--cppcheck-build-dir=#{CPPCHECK_BUILD_PATH}"
     
     unless @config[:platform].nil? || @config[:platform].empty?
       args << "--platform=#{@config[:platform]}"
@@ -163,11 +165,16 @@ class Cppcheck < Plugin
   end
   
   def args_builder_text()
-    return ["--output-file=#{@text_artifact_filepath}"]
+    return [
+      "--output-file=#{@text_artifact_filepath}"
+    ]
   end
   
   def args_builder_xml()
-    return ["--xml", "--output-file=#{@xml_artifact_filepath}"]
+    return [
+      "--xml",
+      "--output-file=#{@xml_artifact_filepath}"
+    ]
   end
   
   def args_builder_html()
@@ -184,9 +191,9 @@ class Cppcheck < Plugin
     return args
   end
   
-  def run(args, *params)
+  def run(tool, args, *params)
     command = @ceedling[:tool_executor].build_command_line(
-      TOOLS_CPPCHECK,
+      tool,
       args,
       *params
     )
@@ -198,33 +205,27 @@ class Cppcheck < Plugin
   end
   
   def generate_text_report(args_common)
-    args = args_common
+    args = args_common.dup()
     args += args_builder_text()
     
     @ceedling[:loginator].log("Creating Cppcheck text report...", Verbosity::NORMAL)
-    results = run(args, COLLECTION_PATHS_SOURCE, COLLECTION_PATHS_INCLUDE)
+    results = run(TOOLS_CPPCHECK, args, COLLECTION_PATHS_SOURCE, COLLECTION_PATHS_INCLUDE)
   end
   
   def generate_xml_report(args_common)
-    args = args_common
-    args += args_builder_xml
+    args = args_common.dup()
+    args += args_builder_xml()
     
     @ceedling[:loginator].log("Creating Cppcheck xml report...", Verbosity::NORMAL)
-    results = run(args, COLLECTION_PATHS_SOURCE, COLLECTION_PATHS_INCLUDE)
+    results = run(TOOLS_CPPCHECK, args, COLLECTION_PATHS_SOURCE, COLLECTION_PATHS_INCLUDE)
   end
   
   def generate_html_report(args_common)
-    generate_xml_report(args_common) unless @ceedling[:file_wrapper].exist?(@xml_artifact_filepath)
+    args = args_common.dup()
+    generate_xml_report(args) unless @ceedling[:file_wrapper].exist?(@xml_artifact_filepath)
     
     @ceedling[:loginator].log("Creating Cppcheck html report...", Verbosity::NORMAL)
-    
-    command = @ceedling[:tool_executor].build_command_line(
-      TOOLS_CPPCHECK_HTMLREPORT,
-      args_builder_html()
-    )
-    @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
-    
-    @ceedling[:tool_executor].exec(command)
+    run(TOOLS_CPPCHECK_HTMLREPORT, args_builder_html())
   end
 end
 

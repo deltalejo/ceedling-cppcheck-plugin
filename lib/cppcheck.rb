@@ -115,7 +115,7 @@ class Cppcheck < Plugin
     args << "--inline-suppr" if @config[:inline_suppressions] == true
     
     unless @config[:check_level].nil? || @config[:check_level].empty?
-      args << "--check-level=#{check_level}"
+      args << "--check-level=#{@config[:check_level]}"
     end
     
     unless @config[:disable_checks].nil? || @config[:disable_checks].empty?

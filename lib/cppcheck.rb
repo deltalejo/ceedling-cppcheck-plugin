@@ -74,7 +74,7 @@ class Cppcheck < Plugin
     all_suppressions = @ceedling[:file_wrapper].instantiate_file_list
     
     in_hash[:collection_paths_cppcheck].each do |path|
-      if File.exists?(path) and not File.directory?(path)
+      if @ceedling[:file_wrapper].exist?(path) && !@ceedling[:file_wrapper].directory?(path)
         all_suppressions.include(path)
       else
         all_suppressions.include(File.join(path, '*.xml') )

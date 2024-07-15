@@ -10,7 +10,7 @@ CPPCHECK_ARTIFACTS_HTML_PATH = File.join(CPPCHECK_ARTIFACTS_PATH, 'html')
 CPPCHECK_ARTIFACTS_FILE_TEXT = 'CppcheckReport.txt'
 CPPCHECK_ARTIFACTS_FILE_XML  = File.basename(CPPCHECK_ARTIFACTS_FILE_TEXT).ext('.xml')
 
-class ReportTypes
+class CppcheckReportTypes
   TEXT = 'text'.freeze
   XML = 'xml'.freeze
   HTML = 'html'.freeze

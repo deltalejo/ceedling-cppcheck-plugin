@@ -7,7 +7,7 @@ class Cppcheck < Plugin
     
     validate_enabled_reports()
     
-    if @config[:reports].include?(ReportTypes::HTML)
+    if @config[:reports].include?(CppcheckReportTypes::HTML)
       @ceedling[:tool_validator].validate(
         tool: TOOLS_CPPCHECK_HTMLREPORT,
         boom: true
@@ -31,15 +31,15 @@ class Cppcheck < Plugin
     args_common = args_builder_common()
     args_common << "--enable=all"
     
-    if @config[:reports].include?(ReportTypes::TEXT)
+    if @config[:reports].include?(CppcheckReportTypes::TEXT)
       generate_text_report(args_common)
     end
     
-    if @config[:reports].include?(ReportTypes::XML)
+    if @config[:reports].include?(CppcheckReportTypes::XML)
       generate_xml_report(args_common)
     end
     
-    if @config[:reports].include?(ReportTypes::HTML)
+    if @config[:reports].include?(CppcheckReportTypes::HTML)
       generate_html_report(args_common)
     end
   end
@@ -59,7 +59,7 @@ class Cppcheck < Plugin
   
   def validate_enabled_reports(boom:false)
     all_valid = @config[:reports].all? do |report|
-      valid = ReportTypes::is_supported?(report)
+      valid = CppcheckReportTypes::is_supported?(report)
       @ceedling[:loginator].log(
         "Report '#{report}' is not supported.",
         Verbosity::ERRORS

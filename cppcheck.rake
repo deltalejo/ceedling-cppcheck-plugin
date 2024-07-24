@@ -35,12 +35,13 @@ rule /^#{CPPCHECK_TASK_ROOT}\S+$/ => [
 end
 
 namespace :files do
-  desc 'List all collected Cppcheck suppressions files.'
+  desc 'List all collected Cppcheck suppression files.'
   task :cppcheck do
-    puts "Cppcheck suppressions files:#{' None' if COLLECTION_ALL_CPPCHECK.empty?}"
-    COLLECTION_ALL_CPPCHECK.sort.each do |filepath|
-      puts " - #{filepath}"
+    files_list = COLLECTION_ALL_CPPCHECK
+    puts "Cppcheck suppression files:#{' None' if files_list.size == 0}"
+    if files_list.size > 0
+      files_list.sort.each { |filepath| puts " - #{filepath}" }
+      puts "File count: #{files_list.size}"
     end
-    puts "file count: #{COLLECTION_ALL_CPPCHECK.size}" unless COLLECTION_ALL_CPPCHECK.empty?
   end
 end

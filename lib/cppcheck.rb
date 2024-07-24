@@ -9,7 +9,6 @@ class Cppcheck < Plugin
     @file_wrapper = @ceedling[:file_wrapper]
     @loginator = @ceedling[:loginator]
     @setupinator = @ceedling[:setupinator]
-    @task_invoker = @ceedling[:task_invoker]
     @tool_executor = @ceedling[:tool_executor]
     @tool_validator = @ceedling[:tool_validator]
     
@@ -265,7 +264,7 @@ end
 # end blocks always executed following rake run
 END {
   # cache our input configurations to use in comparison upon next execution
-  if @task_invoker.invoked?(/^#{CPPCHECK_TASK_ROOT}/)
-    @cacheinator.cache_test_config(@setupinator.config_hash)
+  if @ceedling[:task_invoker].invoked?(/^#{CPPCHECK_TASK_ROOT}/)
+    @ceedling[:cacheinator].cache_test_config(@ceedling[:setupinator].config_hash)
   end
 }

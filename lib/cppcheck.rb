@@ -3,19 +3,29 @@ require 'cppcheck_constants'
 
 class Cppcheck < Plugin
   def setup
-    @config = @ceedling[:setupinator].config_hash[CPPCHECK_SYM]
+    @cacheinator = @ceedling[:cacheinator]
+    @configurator = @ceedling[:configurator]
+    @file_path_collection_utils = @ceedling[:file_path_collection_utils]
+    @file_wrapper = @ceedling[:file_wrapper]
+    @loginator = @ceedling[:loginator]
+    @setupinator = @ceedling[:setupinator]
+    @task_invoker = @ceedling[:task_invoker]
+    @tool_executor = @ceedling[:tool_executor]
+    @tool_validator = @ceedling[:tool_validator]
+    
+    @config = @setupinator.config_hash[CPPCHECK_SYM]
     
     validate_enabled_reports()
     
     if @config[:reports].include?(CppcheckReportTypes::HTML)
-      @ceedling[:tool_validator].validate(
+      @tool_validator.validate(
         tool: TOOLS_CPPCHECK_HTMLREPORT,
         boom: true
       )
     end
     
-    @ceedling[:configurator].replace_flattened_config(
-      collect_suppressions(@ceedling[:configurator].project_config_hash)
+    @configurator.replace_flattened_config(
+      collect_suppressions(@configurator.project_config_hash)
     )
     
     @text_artifact_filepath = form_text_artifact_filepath(
@@ -52,7 +62,7 @@ class Cppcheck < Plugin
     end
     
     results = run(TOOLS_CPPCHECK, args, filepath, COLLECTION_PATHS_INCLUDE)
-    @ceedling[:loginator].log(results[:output], Verbosity::COMPLAIN, LogLabels::NONE)
+    @loginator.log(results[:output], Verbosity::COMPLAIN, LogLabels::NONE)
   end
   
   private
@@ -60,29 +70,36 @@ class Cppcheck < Plugin
   def validate_enabled_reports(boom:false)
     all_valid = @config[:reports].all? do |report|
       valid = CppcheckReportTypes::is_supported?(report)
-      @ceedling[:loginator].log(
+      @loginator.log(
         "Report '#{report}' is not supported.",
         Verbosity::ERRORS
       ) unless valid
       valid
     end
     
-    raise CeedlingException.new("Not supported reports have been requested.") if boom and !all_valid
+    if boom and !all_valid
+      raise CeedlingException.new("Not supported reports have been requested.")
+    end
   end
   
   def collect_suppressions(in_hash)
-    all_suppressions = @ceedling[:file_wrapper].instantiate_file_list
+    all_suppressions = @file_wrapper.instantiate_file_list
     
     in_hash[:collection_paths_cppcheck].each do |path|
-      if @ceedling[:file_wrapper].exist?(path) && !@ceedling[:file_wrapper].directory?(path)
+      if @file_wrapper.exist?(path) && !@file_wrapper.directory?(path)
         all_suppressions.include(path)
       else
         all_suppressions.include(File.join(path, '*.xml') )
-        all_suppressions.include(File.join(path, "*#{in_hash[:extension_cppcheck]}"))
+        all_suppressions.include(File.join(
+          path,
+          "*#{in_hash[:extension_cppcheck]}")
+        )
       end
     end
     
-    @ceedling[:file_path_collection_utils].revise_filelist(all_suppressions, in_hash[:files_cppcheck])
+    @file_path_collection_utils.revise_filelist(
+      all_suppressions,in_hash[:files_cppcheck]
+    )
 
     return {
       :collection_all_cppcheck => all_suppressions
@@ -90,11 +107,17 @@ class Cppcheck < Plugin
   end
   
   def form_text_artifact_filepath(filename)
-    return File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(filename).ext('.txt'))
+    return File.join(
+      CPPCHECK_ARTIFACTS_PATH,
+      File.basename(filename).ext('.txt')
+    )
   end
   
   def form_xml_artifact_filepath(filename)
-    return File.join(CPPCHECK_ARTIFACTS_PATH, File.basename(filename).ext('.xml'))
+    return File.join(
+      CPPCHECK_ARTIFACTS_PATH,
+      File.basename(filename).ext('.xml')
+    )
   end
   
   def args_builder_common()
@@ -192,14 +215,14 @@ class Cppcheck < Plugin
   end
   
   def run(tool, args, *params)
-    command = @ceedling[:tool_executor].build_command_line(
+    command = @tool_executor.build_command_line(
       tool,
       args,
       *params
     )
-    @ceedling[:loginator].log("Command: #{command}", Verbosity::DEBUG)
+    @loginator.log("Command: #{command}", Verbosity::DEBUG)
     
-    results = @ceedling[:tool_executor].exec(command)
+    results = @tool_executor.exec(command)
     
     return results
   end
@@ -208,23 +231,33 @@ class Cppcheck < Plugin
     args = args_common.dup()
     args += args_builder_text()
     
-    @ceedling[:loginator].log("Creating Cppcheck text report...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args, COLLECTION_PATHS_SOURCE, COLLECTION_PATHS_INCLUDE)
+    @loginator.log("Creating Cppcheck text report...", Verbosity::NORMAL)
+    results = run(
+      TOOLS_CPPCHECK,
+      args,
+      COLLECTION_PATHS_SOURCE,
+      COLLECTION_PATHS_INCLUDE
+    )
   end
   
   def generate_xml_report(args_common)
     args = args_common.dup()
     args += args_builder_xml()
     
-    @ceedling[:loginator].log("Creating Cppcheck xml report...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args, COLLECTION_PATHS_SOURCE, COLLECTION_PATHS_INCLUDE)
+    @loginator.log("Creating Cppcheck xml report...", Verbosity::NORMAL)
+    results = run(
+      TOOLS_CPPCHECK,
+      args,
+      COLLECTION_PATHS_SOURCE,
+      COLLECTION_PATHS_INCLUDE
+    )
   end
   
   def generate_html_report(args_common)
     args = args_common.dup()
-    generate_xml_report(args) unless @ceedling[:file_wrapper].exist?(@xml_artifact_filepath)
+    generate_xml_report(args) unless @file_wrapper.exist?(@xml_artifact_filepath)
     
-    @ceedling[:loginator].log("Creating Cppcheck html report...", Verbosity::NORMAL)
+    @loginator.log("Creating Cppcheck html report...", Verbosity::NORMAL)
     run(TOOLS_CPPCHECK_HTMLREPORT, args_builder_html())
   end
 end
@@ -232,7 +265,7 @@ end
 # end blocks always executed following rake run
 END {
   # cache our input configurations to use in comparison upon next execution
-  if @ceedling[:task_invoker].invoked?(/^#{CPPCHECK_TASK_ROOT}/)
-    @ceedling[:cacheinator].cache_test_config(@ceedling[:setupinator].config_hash)
+  if @task_invoker.invoked?(/^#{CPPCHECK_TASK_ROOT}/)
+    @cacheinator.cache_test_config(@setupinator.config_hash)
   end
 }

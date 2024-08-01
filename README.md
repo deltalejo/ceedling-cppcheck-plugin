@@ -12,32 +12,32 @@ code with [Cppcheck](http://cppcheck.net/).
 - [Installation](#installation)
 - [Enable the plugin](#enable-the-plugin)
 - [Configuration](#configuration)
-  - [Reports](#reports)
-    - [Text](#text)
-    - [XML](#xml)
-    - [HTML](#html)
-  - [Project](#importing-project)
-  - [Preprocessor defines](#preprocessor-defines)
-    - [Define](#define)
-    - [Undefine](#undefine)
-  - [Includes](#includes)
-  - [Excludes](#excludes)
-  - [Platform](#platform)
-  - [Standard](#standard)
-  - [Check Level](#check-level)
-  - [Addons](#addons)
-    - [MISRA with rule texts file](#misra-with-rule-texts-file)
-  - [Checks](#checks)
-  - [Suppressions](#suppressions)
-    - [Inline](#inline)
-    - [List Files](#list-files)
-    - [Command Line](#command-line)
-  - [Library configuration](#library-configuration)
-  - [Rules](#rules)
-  - [Extra arguments](#extra-arguments)
+	- [Reports](#reports)
+		- [Text](#text)
+		- [XML](#xml)
+		- [HTML](#html)
+	- [Project](#importing-project)
+	- [Preprocessor defines](#preprocessor-defines)
+		- [Define](#define)
+		- [Undefine](#undefine)
+	- [Includes](#includes)
+	- [Excludes](#excludes)
+	- [Platform](#platform)
+	- [Standard](#standard)
+	- [Check Level](#check-level)
+	- [Addons](#addons)
+		- [MISRA with rule texts file](#misra-with-rule-texts-file)
+	- [Checks](#checks)
+	- [Suppressions](#suppressions)
+		- [Inline](#inline)
+		- [List Files](#list-files)
+		- [Command Line](#command-line)
+	- [Library configuration](#library-configuration)
+	- [Rules](#rules)
+	- [Extra arguments](#extra-arguments)
 - [Usage](#usage)
-  - [Analyze whole project](#analyze-whole-project)
-  - [Analyze single file](#analyze-single-file)
+	- [Analyze whole project](#analyze-whole-project)
+	- [Analyze single file](#analyze-single-file)
 
 <!-- /TOC -->
 
@@ -45,9 +45,9 @@ code with [Cppcheck](http://cppcheck.net/).
 
 Clone this into Ceedling's plugin folder of your current project.
 
-```bash
-cd <your-project>/vendor/ceedling/plugins
-git clone https://github.com/deltalejo/cppcheck-ceedling-plugin.git cppcheck
+```shell
+$ cd <your-project>/vendor/ceedling/plugins
+$ git clone https://github.com/deltalejo/cppcheck-ceedling-plugin.git cppcheck
 ```
 
 ## Enable the plugin
@@ -245,11 +245,10 @@ e.g.: `<your-project>/misra.txt` and create the addon file `misra.json` inside
 your project:
 
 ##### **`misra.json`**
-
 ```json
 {
-  "script": "misra",
-  "args": ["--rule-texts=misra.txt"]
+	"script": "misra",
+	"args": ["--rule-texts=misra.txt"]
 }
 ```
 
@@ -324,8 +323,8 @@ e.g.:
 
 The files that will ultimately be used can be verified with:
 
-```bash
-ceedling files:cppcheck
+```shell
+$ ceedling files:cppcheck
 ```
 
 #### Command Line
@@ -377,8 +376,8 @@ For things not covered above, add extra command line arguments:
 
 Run analysis for all project sources:
 
-```bash
-ceedling cppcheck:all
+```shell
+$ ceedling cppcheck:all
 ```
 
 *Note: Analysis is run with* all *checks enabled.*
@@ -387,8 +386,8 @@ ceedling cppcheck:all
 
 Run analysis for single source file:
 
-```bash
-ceedling cppcheck:<filename>
+```shell
+$ ceedling cppcheck:<filename>
 ```
 
 *Note: Analysis will run with the checks in [`:enable_checks`](#checks) list enabled.*

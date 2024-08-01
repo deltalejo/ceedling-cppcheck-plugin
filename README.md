@@ -4,6 +4,7 @@ Add [Ceedling](https://github.com/ThrowTheSwitch/Ceedling) task for analyzing
 code with [Cppcheck](http://cppcheck.net/).
 
 <!-- TOC ignore:true -->
+
 ## Contents
 
 <!-- TOC -->
@@ -11,31 +12,32 @@ code with [Cppcheck](http://cppcheck.net/).
 - [Installation](#installation)
 - [Enable the plugin](#enable-the-plugin)
 - [Configuration](#configuration)
-	- [Reports](#reports)
-		- [Text](#text)
-		- [XML](#xml)
-		- [HTML](#html)
-	- [Preprocessor defines](#preprocessor-defines)
-		- [Define](#define)
-		- [Undefine](#undefine)
-	- [Includes](#includes)
-	- [Excludes](#excludes)
-	- [Platform](#platform)
-	- [Standard](#standard)
-	- [Check Level](#check-level)
-	- [Addons](#addons)
-		- [MISRA with rule texts file](#misra-with-rule-texts-file)
-	- [Checks](#checks)
-	- [Suppressions](#suppressions)
-		- [Inline](#inline)
-		- [List Files](#list-files)
-		- [Command Line](#command-line)
-	- [Library configuration](#library-configuration)
-	- [Rules](#rules)
-	- [Extra arguments](#extra-arguments)
+  - [Reports](#reports)
+    - [Text](#text)
+    - [XML](#xml)
+    - [HTML](#html)
+  - [Project](#importing-project)
+  - [Preprocessor defines](#preprocessor-defines)
+    - [Define](#define)
+    - [Undefine](#undefine)
+  - [Includes](#includes)
+  - [Excludes](#excludes)
+  - [Platform](#platform)
+  - [Standard](#standard)
+  - [Check Level](#check-level)
+  - [Addons](#addons)
+    - [MISRA with rule texts file](#misra-with-rule-texts-file)
+  - [Checks](#checks)
+  - [Suppressions](#suppressions)
+    - [Inline](#inline)
+    - [List Files](#list-files)
+    - [Command Line](#command-line)
+  - [Library configuration](#library-configuration)
+  - [Rules](#rules)
+  - [Extra arguments](#extra-arguments)
 - [Usage](#usage)
-	- [Analyze whole project](#analyze-whole-project)
-	- [Analyze single file](#analyze-single-file)
+  - [Analyze whole project](#analyze-whole-project)
+  - [Analyze single file](#analyze-single-file)
 
 <!-- /TOC -->
 
@@ -43,9 +45,9 @@ code with [Cppcheck](http://cppcheck.net/).
 
 Clone this into Ceedling's plugin folder of your current project.
 
-```shell
-$ cd <your-project>/vendor/ceedling/plugins
-$ git clone https://github.com/deltalejo/cppcheck-ceedling-plugin.git cppcheck
+```bash
+cd <your-project>/vendor/ceedling/plugins
+git clone https://github.com/deltalejo/cppcheck-ceedling-plugin.git cppcheck
 ```
 
 ## Enable the plugin
@@ -124,8 +126,29 @@ Artifact directory and HTML title can be configured:
 
 *Notes:*
 
-* This report requires the `cppcheck-htmlreport` tool to be available.
-* This report implies the `xml` report.
+- This report requires the `cppcheck-htmlreport` tool to be available.
+- This report implies the `xml` report.
+
+### Importing Project
+
+You can import some project files and build configurations into Cppcheck.
+
+Some of compatible files are:
+
+- Cppcheck GUI project (\*.cppcheck)
+- Compile Commands (compile_commands.json)
+- Visual Studio projects (\*.vcxproj, \*.sln)
+
+Project file can be configured:
+
+```yaml
+:cppcheck:
+  :project: path/to/compile_commands.json
+```
+
+*Notes:*
+
+If configured, cppcheck won't look for sources, and includes paths from *ceedling* configuration files.
 
 ### Preprocessor defines
 
@@ -222,10 +245,11 @@ e.g.: `<your-project>/misra.txt` and create the addon file `misra.json` inside
 your project:
 
 ##### **`misra.json`**
+
 ```json
 {
-	"script": "misra",
-	"args": ["--rule-texts=misra.txt"]
+  "script": "misra",
+  "args": ["--rule-texts=misra.txt"]
 }
 ```
 
@@ -353,8 +377,8 @@ For things not covered above, add extra command line arguments:
 
 Run analysis for all project sources:
 
-```shell
-$ ceedling cppcheck:all
+```bash
+ceedling cppcheck:all
 ```
 
 *Note: Analysis is run with* all *checks enabled.*
@@ -363,8 +387,8 @@ $ ceedling cppcheck:all
 
 Run analysis for single source file:
 
-```shell
-$ ceedling cppcheck:<filename>
+```bash
+ceedling cppcheck:<filename>
 ```
 
 *Note: Analysis will run with the checks in [`:enable_checks`](#checks) list enabled.*

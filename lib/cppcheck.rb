@@ -60,7 +60,13 @@ class Cppcheck < Plugin
       args << "--enable=#{@config[:enable_checks].join(',')}"
     end
     
-    results = run(TOOLS_CPPCHECK, args, filepath, COLLECTION_PATHS_INCLUDE)
+    args << "\"#{filepath}\""
+    COLLECTION_PATHS_INCLUDE.each do |path_include|
+      args << "-I\"#{path_include}\""
+    end
+    
+    @loginator.log("Analysing #{filepath}...", Verbosity::NORMAL)
+    results = run(TOOLS_CPPCHECK, args)
     @loginator.log(results[:output], Verbosity::COMPLAIN, LogLabels::NONE)
   end
   
@@ -138,10 +144,6 @@ class Cppcheck < Plugin
     
     args << "--inline-suppr" if @config[:inline_suppressions] == true
     
-    unless @config[:project].nil? || @config[:project].empty?
-      args << "--project=#{@config[:project]}"
-    end
-    
     unless @config[:check_level].nil? || @config[:check_level].empty?
       args << "--check-level=#{@config[:check_level]}"
     end
@@ -193,50 +195,35 @@ class Cppcheck < Plugin
 
     return args
   end
-  
-  def args_builder_text(args)
-    if args.nil? || args.empty?
-      args = []
-    end
 
-    args << "--output-file=#{@text_artifact_filepath}"
+  def args_project_builder()
+    args = []
     
     if @config[:project].nil? || @config[:project].empty?
       COLLECTION_PATHS_INCLUDE.each do |path_include|
         args << "-I\"#{path_include}\""
       end
-      COLLECTION_PATHS_RELEASE_TOOLCHAIN_INCLUDE.each do |path_include|
-        args << "-I\"#{path_include}\""
-      end
       COLLECTION_PATHS_SOURCE.each do |path_source|
         args << "\"#{path_source}\""
       end
+    else
+      args << "--project=#{@config[:project]}"
     end
 
     return args
   end
   
-  def args_builder_xml(args)
-    if args.nil? || args.empty?
-      args = []
-    end
-
-    args << "--xml"
-    args << "--output-file=#{@xml_artifact_filepath}"
-    
-    if @config[:project].nil? || @config[:project].empty?
-      COLLECTION_PATHS_INCLUDE.each do |path_include|
-        args << "-I\"#{path_include}\""
-      end
-      COLLECTION_PATHS_RELEASE_TOOLCHAIN_INCLUDE.each do |path_include|
-        args << "-I\"#{path_include}\""
-      end
-      COLLECTION_PATHS_SOURCE.each do |path_source|
-        args << "\"#{path_source}\""
-      end
-    end
-
-    return args
+  def args_builder_text()
+    return [
+      "--output-file=#{@text_artifact_filepath}"
+    ]
+  end
+  
+  def args_builder_xml()
+    return [
+      "--xml",
+      "--output-file=#{@xml_artifact_filepath}"
+    ]
   end
   
   def args_builder_html()
@@ -267,17 +254,21 @@ class Cppcheck < Plugin
   end
   
   def generate_text_report(args_common)
-    args = args_common.dup()
+    args = args_project_builder()
+    args += args_common.dup()
+    args += args_builder_text()
     
     @loginator.log("Creating Cppcheck text report...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args_builder_text(args))
+    results = run(TOOLS_CPPCHECK, args)
   end
   
   def generate_xml_report(args_common)
-    args = args_common.dup()
+    args = args_project_builder()
+    args += args_common.dup()
+    args += args_builder_xml()
     
     @loginator.log("Creating Cppcheck xml report...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args_builder_xml(args))
+    results = run(TOOLS_CPPCHECK, args)
   end
   
   def generate_html_report(args_common)

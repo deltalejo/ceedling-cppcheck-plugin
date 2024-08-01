@@ -8,6 +8,7 @@
   :platform: null
   :standard: null
   :check_level: null
+  :project: null
   :inline_suppressions: false
   :enable_checks:
     - style

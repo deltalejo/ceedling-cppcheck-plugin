@@ -4,6 +4,7 @@ Add [Ceedling](https://github.com/ThrowTheSwitch/Ceedling) task for analyzing
 code with [Cppcheck](http://cppcheck.net/).
 
 <!-- TOC ignore:true -->
+
 ## Contents
 
 <!-- TOC -->
@@ -15,6 +16,7 @@ code with [Cppcheck](http://cppcheck.net/).
 		- [Text](#text)
 		- [XML](#xml)
 		- [HTML](#html)
+	- [Project](#importing-project)
 	- [Preprocessor defines](#preprocessor-defines)
 		- [Define](#define)
 		- [Undefine](#undefine)
@@ -124,8 +126,29 @@ Artifact directory and HTML title can be configured:
 
 *Notes:*
 
-* This report requires the `cppcheck-htmlreport` tool to be available.
-* This report implies the `xml` report.
+- This report requires the `cppcheck-htmlreport` tool to be available.
+- This report implies the `xml` report.
+
+### Importing Project
+
+You can import some project files and build configurations into Cppcheck.
+
+Some of compatible files are:
+
+- Cppcheck GUI project (\*.cppcheck)
+- Compile Commands (compile_commands.json)
+- Visual Studio projects (\*.vcxproj, \*.sln)
+
+Project file can be configured:
+
+```yaml
+:cppcheck:
+  :project: path/to/compile_commands.json
+```
+
+*Notes:*
+
+If configured, cppcheck won't look for sources, and includes paths from *ceedling* configuration files.
 
 ### Preprocessor defines
 
@@ -300,8 +323,8 @@ e.g.:
 
 The files that will ultimately be used can be verified with:
 
-```bash
-ceedling files:cppcheck
+```shell
+$ ceedling files:cppcheck
 ```
 
 #### Command Line

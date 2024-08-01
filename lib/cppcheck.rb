@@ -11,7 +11,7 @@ class Cppcheck < Plugin
     @setupinator = @ceedling[:setupinator]
     @tool_executor = @ceedling[:tool_executor]
     @tool_validator = @ceedling[:tool_validator]
-    
+
     @config = @setupinator.config_hash[CPPCHECK_SYM]
     
     validate_enabled_reports()
@@ -60,7 +60,13 @@ class Cppcheck < Plugin
       args << "--enable=#{@config[:enable_checks].join(',')}"
     end
     
-    results = run(TOOLS_CPPCHECK, args, filepath, COLLECTION_PATHS_INCLUDE)
+    args << "\"#{filepath}\""
+    COLLECTION_PATHS_INCLUDE.each do |path_include|
+      args << "-I\"#{path_include}\""
+    end
+    
+    @loginator.log("Analysing #{filepath}...", Verbosity::NORMAL)
+    results = run(TOOLS_CPPCHECK, args)
     @loginator.log(results[:output], Verbosity::COMPLAIN, LogLabels::NONE)
   end
   
@@ -182,8 +188,29 @@ class Cppcheck < Plugin
     @config[:undefines]&.each do |undefine|
       args << "-U#{undefine}"
     end
+
+    @config[:arguments]&.each do |argument|
+      args << "#{argument}"
+    end
+
+    return args
+  end
+
+  def args_project_builder()
+    args = []
     
-    args += @config[:arguments]
+    if @config[:project].nil? || @config[:project].empty?
+      COLLECTION_PATHS_INCLUDE.each do |path_include|
+        args << "-I\"#{path_include}\""
+      end
+      COLLECTION_PATHS_SOURCE.each do |path_source|
+        args << "\"#{path_source}\""
+      end
+    else
+      args << "--project=#{@config[:project]}"
+    end
+
+    return args
   end
   
   def args_builder_text()
@@ -227,29 +254,21 @@ class Cppcheck < Plugin
   end
   
   def generate_text_report(args_common)
-    args = args_common.dup()
+    args = args_project_builder()
+    args += args_common.dup()
     args += args_builder_text()
     
     @loginator.log("Creating Cppcheck text report...", Verbosity::NORMAL)
-    results = run(
-      TOOLS_CPPCHECK,
-      args,
-      COLLECTION_PATHS_SOURCE,
-      COLLECTION_PATHS_INCLUDE
-    )
+    results = run(TOOLS_CPPCHECK, args)
   end
   
   def generate_xml_report(args_common)
-    args = args_common.dup()
+    args = args_project_builder()
+    args += args_common.dup()
     args += args_builder_xml()
     
     @loginator.log("Creating Cppcheck xml report...", Verbosity::NORMAL)
-    results = run(
-      TOOLS_CPPCHECK,
-      args,
-      COLLECTION_PATHS_SOURCE,
-      COLLECTION_PATHS_INCLUDE
-    )
+    results = run(TOOLS_CPPCHECK, args)
   end
   
   def generate_html_report(args_common)

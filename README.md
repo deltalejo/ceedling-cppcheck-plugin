@@ -116,11 +116,10 @@ Artifact file can be configured:
 
 #### HTML
 
-Artifact directory and HTML title can be configured:
+HTML title can be configured:
 
 ```yaml
 :cppcheck:
-  :html_artifact_dirname: CppcheckHtml
   :html_title: Awesome Project
 ```
 

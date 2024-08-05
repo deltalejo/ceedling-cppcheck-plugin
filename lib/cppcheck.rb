@@ -9,10 +9,19 @@ class Cppcheck < Plugin
     @file_wrapper = @ceedling[:file_wrapper]
     @loginator = @ceedling[:loginator]
     @setupinator = @ceedling[:setupinator]
+    @system_wrapper = @ceedling[:system_wrapper]
     @tool_executor = @ceedling[:tool_executor]
     @tool_validator = @ceedling[:tool_validator]
-
+    
     @config = @setupinator.config_hash[CPPCHECK_SYM]
+    
+    @config.each do |key,value|
+      if @config[key] =~ RUBY_STRING_REPLACEMENT_PATTERN
+        @config[key].replace(
+          @system_wrapper.module_eval(@config[key])
+        )
+      end
+    end
     
     validate_enabled_reports()
     

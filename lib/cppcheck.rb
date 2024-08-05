@@ -9,10 +9,13 @@ class Cppcheck < Plugin
     @file_wrapper = @ceedling[:file_wrapper]
     @loginator = @ceedling[:loginator]
     @setupinator = @ceedling[:setupinator]
+    @system_wrapper = @ceedling[:system_wrapper]
     @tool_executor = @ceedling[:tool_executor]
     @tool_validator = @ceedling[:tool_validator]
-
+    
     @config = @setupinator.config_hash[CPPCHECK_SYM]
+    
+    eval_configs()
     
     validate_enabled_reports()
     
@@ -72,6 +75,30 @@ class Cppcheck < Plugin
   
   private
   
+  def eval_configs()
+    @config.each do |key,value|
+      case value
+      when Array
+        # If it's an array of strings, process it
+        if value.all? { |item| item.is_a?( String ) }
+          # Expand in place each string item in the array
+          value.each do |item|
+            if (item =~ RUBY_STRING_REPLACEMENT_PATTERN)
+              item.replace(@system_wrapper.module_eval(item))
+            end
+          end
+        else
+          raise CeedlingException.new("Type of :#{key} (#{value.class}) is not supported.")
+        end
+      when String
+        # If it's a string, process it
+        if (value =~ RUBY_STRING_REPLACEMENT_PATTERN)
+          value.replace(@system_wrapper.module_eval(value))
+        end
+      end
+    end
+  end
+
   def validate_enabled_reports(boom:false)
     all_valid = @config[:reports].all? do |report|
       valid = CppcheckReportTypes::is_supported?(report)

@@ -4,7 +4,6 @@ Add [Ceedling](https://github.com/ThrowTheSwitch/Ceedling) task for analyzing
 code with [Cppcheck](http://cppcheck.net/).
 
 <!-- TOC ignore:true -->
-
 ## Contents
 
 <!-- TOC -->
@@ -16,7 +15,7 @@ code with [Cppcheck](http://cppcheck.net/).
 		- [Text](#text)
 		- [XML](#xml)
 		- [HTML](#html)
-	- [Project](#importing-project)
+	- [Import project file](#import-project-file)
 	- [Preprocessor defines](#preprocessor-defines)
 		- [Define](#define)
 		- [Undefine](#undefine)
@@ -34,7 +33,7 @@ code with [Cppcheck](http://cppcheck.net/).
 		- [Command Line](#command-line)
 	- [Library configuration](#library-configuration)
 	- [Rules](#rules)
-	- [Extra arguments](#extra-arguments)
+	- [Extra options](#extra-options)
 - [Usage](#usage)
 	- [Analyze whole project](#analyze-whole-project)
 	- [Analyze single file](#analyze-single-file)
@@ -128,26 +127,22 @@ HTML title can be configured:
 - This report requires the `cppcheck-htmlreport` tool to be available.
 - This report implies the `xml` report.
 
-### Importing Project
+### Import project file
 
 You can import some project files and build configurations into Cppcheck.
-
 Some of compatible files are:
 
 - Cppcheck GUI project (\*.cppcheck)
 - Compile Commands (compile_commands.json)
 - Visual Studio projects (\*.vcxproj, \*.sln)
 
-Project file can be configured:
-
 ```yaml
 :cppcheck:
   :project: path/to/compile_commands.json
 ```
 
-*Notes:*
-
-If configured, cppcheck won't look for sources, and includes paths from *ceedling* configuration files.
+*Note: If configured, Cppcheck won't look for sources and includes paths from*
+*_Ceedling_ configuration files.*
 
 ### Preprocessor defines
 
@@ -358,13 +353,13 @@ Regular expression rules:
     - if \( p \) { free \( p \) ; }
 ```
 
-### Extra arguments
+### Extra options
 
-For things not covered above, add extra command line arguments:
+For things not covered above, add extra command line options:
 
 ```yaml
 :cppcheck:
-  :arguments:
+  :options:
     - --max-configs=<limit>
     - --suppressions-list=<file>
 ```

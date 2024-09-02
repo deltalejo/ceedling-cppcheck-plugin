@@ -15,7 +15,7 @@ class Cppcheck < Plugin
     
     @config = @setupinator.config_hash[CPPCHECK_SYM]
     
-    eval_configs()
+    evaluate_config()
     validate_enabled_reports()
     
     if @config[:reports].include?(CppcheckReportTypes::HTML)
@@ -95,7 +95,7 @@ class Cppcheck < Plugin
       end
   end
   
-  def eval_configs()
+  def evaluate_config()
     @config.each_value do |item|
       traverse_config_eval_strings(item)
     end

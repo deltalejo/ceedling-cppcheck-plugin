@@ -106,7 +106,7 @@ class Cppcheck < Plugin
           end
         end
       when Hash
-        config.each_value {|value|traverse_hash_eval_string_arrays(value)}
+        config.each_value {|value| traverse_config_eval_strings(value)}
       end
   end
   

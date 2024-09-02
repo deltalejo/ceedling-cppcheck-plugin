@@ -16,7 +16,6 @@ class Cppcheck < Plugin
     @config = @setupinator.config_hash[CPPCHECK_SYM]
     
     eval_configs()
-    
     validate_enabled_reports()
     
     if @config[:reports].include?(CppcheckReportTypes::HTML)
@@ -40,65 +39,68 @@ class Cppcheck < Plugin
   end
   
   def generate_reports()
-    args_common = args_builder_common()
-    args_common << "--enable=all"
+    using_project_file = !(@config[:project].nil? || @config[:project].empty?)
+    include_paths = using_project_file ? [] : COLLECTION_PATHS_INCLUDE
+    source_paths = using_project_file ? [] : COLLECTION_PATHS_SOURCE
+    
+    opts = opts_builder_project()
+    args = [
+      include_paths,
+      source_paths
+    ]
     
     if @config[:reports].include?(CppcheckReportTypes::TEXT)
-      generate_text_report(args_common)
+      generate_text_report(opts, *args)
     end
     
     if @config[:reports].include?(CppcheckReportTypes::XML)
-      generate_xml_report(args_common)
+      generate_xml_report(opts, *args)
     end
     
     if @config[:reports].include?(CppcheckReportTypes::HTML)
-      generate_html_report(args_common)
+      generate_html_report(opts, *args)
     end
   end
   
   def analyze_file(filepath)
-    args = args_builder_common()
+    opts = opts_builder_file()
+    args = [
+      COLLECTION_PATHS_INCLUDE,
+      filepath
+    ]
     
-    unless @config[:enable_checks].nil? || @config[:enable_checks].empty?
-      args << "--enable=#{@config[:enable_checks].join(',')}"
-    end
-    
-    args << "\"#{filepath}\""
-    COLLECTION_PATHS_INCLUDE.each do |path_include|
-      args << "-I\"#{path_include}\""
-    end
-    
-    @loginator.log("Analysing #{filepath}...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args)
+    @loginator.log("Running Cppcheck on file #{filepath} ...", Verbosity::NORMAL)
+    results = run(TOOLS_CPPCHECK, opts, *args)
     @loginator.log(results[:output], Verbosity::COMPLAIN, LogLabels::NONE)
   end
   
   private
   
-  def eval_configs()
-    @config.each do |key,value|
-      case value
+  def traverse_config_eval_strings(config)
+    case config
+      when String
+        if (config =~ RUBY_STRING_REPLACEMENT_PATTERN)
+          config.replace(@system_wrapper.module_eval(config))
+        end
       when Array
-        # If it's an array of strings, process it
-        if value.all? { |item| item.is_a?( String ) }
-          # Expand in place each string item in the array
-          value.each do |item|
+        if config.all? {|item| item.is_a?(String)}
+          config.each do |item|
             if (item =~ RUBY_STRING_REPLACEMENT_PATTERN)
               item.replace(@system_wrapper.module_eval(item))
             end
           end
-        else
-          raise CeedlingException.new("Type of :#{key} (#{value.class}) is not supported.")
         end
-      when String
-        # If it's a string, process it
-        if (value =~ RUBY_STRING_REPLACEMENT_PATTERN)
-          value.replace(@system_wrapper.module_eval(value))
-        end
+      when Hash
+        config.each_value {|value|traverse_hash_eval_string_arrays(value)}
       end
+  end
+  
+  def eval_configs()
+    @config.each_value do |item|
+      traverse_config_eval_strings(item)
     end
   end
-
+  
   def validate_enabled_reports(boom:false)
     all_valid = @config[:reports].all? do |report|
       valid = CppcheckReportTypes::is_supported?(report)
@@ -132,7 +134,7 @@ class Cppcheck < Plugin
     @file_path_collection_utils.revise_filelist(
       all_suppressions,in_hash[:files_cppcheck]
     )
-
+    
     return {
       :collection_all_cppcheck => all_suppressions
     }
@@ -152,126 +154,134 @@ class Cppcheck < Plugin
     )
   end
   
-  def args_builder_common()
-    args = []
-    
-    args << "--cppcheck-build-dir=#{CPPCHECK_BUILD_PATH}"
+  def opts_builder_common()
+    opts = []
     
     unless @config[:platform].nil? || @config[:platform].empty?
-      args << "--platform=#{@config[:platform]}"
+      opts << "--platform=#{@config[:platform]}"
     end
     
     unless @config[:template].nil? || @config[:template].empty?
-      args << "--template=#{@config[:template]}"
+      opts << "--template=#{@config[:template]}"
     end
     
     unless @config[:standard].nil? || @config[:standard].empty?
-      args << "--std=#{@config[:standard]}"
+      opts << "--std=#{@config[:standard]}"
     end
     
-    args << "--inline-suppr" if @config[:inline_suppressions] == true
+    opts << "--inline-suppr" if @config[:inline_suppressions] == true
     
     unless @config[:check_level].nil? || @config[:check_level].empty?
-      args << "--check-level=#{@config[:check_level]}"
+      opts << "--check-level=#{@config[:check_level]}"
     end
     
     unless @config[:disable_checks].nil? || @config[:disable_checks].empty?
-      args << "--disable=#{@config[:disable_checks].join(',')}"
+      opts << "--disable=#{@config[:disable_checks].join(',')}"
     end
     
     @config[:addons]&.each do |addon|
-      args << "--addon=#{addon}"
+      opts << "--addon=#{addon}"
     end
     
     @config[:includes]&.each do |include|
-      args << "--include=#{include}"
+      opts << "--include=#{include}"
     end
     
     @config[:excludes]&.each do |exclude|
-      args << "-i#{exclude}"
+      opts << "-i#{exclude}"
     end
     
     @config[:libraries]&.each do |library|
-      args << "--library=#{library}"
+      opts << "--library=#{library}"
     end
     
     @config[:rules]&.each do |rule|
-      args << "--rule=#{rule}"
+      opts << "--rule=#{rule}"
     end
     
     COLLECTION_ALL_CPPCHECK.each do |suppression|
       option = suppression.end_with?('.xml')? '--suppress-xml' : '--suppressions-list'
-      args << "#{option}=#{suppression}"
+      opts << "#{option}=#{suppression}"
     end
     
     @config[:suppressions]&.each do |suppression|
-      args << "--suppress=#{suppression}"
+      opts << "--suppress=#{suppression}"
     end
     
     @config[:defines]&.each do |define|
-      args << "-D#{define}"
+      opts << "-D#{define}"
     end
     
     @config[:undefines]&.each do |undefine|
-      args << "-U#{undefine}"
+      opts << "-U#{undefine}"
     end
-
-    @config[:arguments]&.each do |argument|
-      args << "#{argument}"
+    
+    @config[:options]&.each do |option|
+      opts << "#{option}"
     end
-
-    return args
+    
+    return opts
   end
 
-  def args_project_builder()
-    args = []
+  def opts_builder_project()
+    opts = opts_builder_common();
     
-    if @config[:project].nil? || @config[:project].empty?
-      COLLECTION_PATHS_INCLUDE.each do |path_include|
-        args << "-I\"#{path_include}\""
-      end
-      COLLECTION_PATHS_SOURCE.each do |path_source|
-        args << "\"#{path_source}\""
-      end
-    else
-      args << "--project=#{@config[:project]}"
+    opts << "--cppcheck-build-dir=#{CPPCHECK_BUILD_PATH}"
+    opts << '--enable=all'
+    
+    unless @config[:project].nil? || @config[:project].empty?
+      opts << "--project=#{@config[:project]}"
     end
-
-    return args
+    
+    return opts
   end
   
-  def args_builder_text()
-    return [
+  def opts_builder_file()
+    opts = opts_builder_common()
+    
+    unless @config[:enable_checks].nil? || @config[:enable_checks].empty?
+      opts << "--enable=#{@config[:enable_checks].join(',')}"
+    end
+    
+    return opts
+  end
+  
+  def opts_builder_text()
+    opt = [
       "--output-file=#{@text_artifact_filepath}"
     ]
+    
+    return opts
   end
   
-  def args_builder_xml()
-    return [
+  def opts_builder_xml()
+    opts = [
       "--xml",
       "--output-file=#{@xml_artifact_filepath}"
     ]
+    
+    return opts
   end
   
-  def args_builder_html()
-    args = []
+  def opts_builder_html()
+    opts = []
     
-    args << "--file=#{@xml_artifact_filepath}"
-    args << "--report-dir=#{CPPCHECK_ARTIFACTS_HTML_PATH}"
-    args << "--source-dir=."
+    opts << "--file=#{@xml_artifact_filepath}"
+    opts << "--report-dir=#{CPPCHECK_ARTIFACTS_HTML_PATH}"
+    opts << "--source-dir=."
     
     unless @config[:html_title].nil? || @config[:html_title].empty?
-      args << "--title=#{@config[:html_title]}"
+      opts << "--title=#{@config[:html_title]}"
     end
     
-    return args
+    return opts
   end
   
-  def run(tool, args, *params)
+  def run(tool, opts, *args)
     command = @tool_executor.build_command_line(
       tool,
-      args,
-      *params
+      opts,
+      *args
     )
     @loginator.log("Command: #{command}", Verbosity::DEBUG)
     
@@ -280,30 +290,27 @@ class Cppcheck < Plugin
     return results
   end
   
-  def generate_text_report(args_common)
-    args = args_project_builder()
-    args += args_common.dup()
-    args += args_builder_text()
+  def generate_text_report(opts, *args)
+    opts = opts.dup()
+    opts += opts_builder_text()
     
     @loginator.log("Creating Cppcheck text report...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args)
+    results = run(TOOLS_CPPCHECK, opts, *args)
   end
   
-  def generate_xml_report(args_common)
-    args = args_project_builder()
-    args += args_common.dup()
-    args += args_builder_xml()
+  def generate_xml_report(opts, *args)
+    opts = opts.dup()
+    opts += opts_builder_xml()
     
     @loginator.log("Creating Cppcheck xml report...", Verbosity::NORMAL)
-    results = run(TOOLS_CPPCHECK, args)
+    results = run(TOOLS_CPPCHECK, opts, *args)
   end
   
-  def generate_html_report(args_common)
-    args = args_common.dup()
-    generate_xml_report(args) unless @file_wrapper.exist?(@xml_artifact_filepath)
+  def generate_html_report(opts, *args)
+    generate_xml_report(opts, *args) unless @file_wrapper.exist?(@xml_artifact_filepath)
     
     @loginator.log("Creating Cppcheck html report...", Verbosity::NORMAL)
-    run(TOOLS_CPPCHECK_HTMLREPORT, args_builder_html())
+    run(TOOLS_CPPCHECK_HTMLREPORT, opts_builder_html())
   end
 end
 

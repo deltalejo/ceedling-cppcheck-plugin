@@ -3,7 +3,10 @@ DEFAULT_CPPCHECK_TOOL = {
   :name => 'default_cppcheck'.freeze,
   :stderr_redirect => StdErrRedirect::AUTO.freeze,
   :optional => false.freeze,
-  :arguments => [].freeze
+  :arguments => [
+    '-I"${1}"'.freeze,
+    '${2}'.freeze
+  ].freeze
 }
 
 DEFAULT_CPPCHECK_HTMLREPORT_TOOL = {

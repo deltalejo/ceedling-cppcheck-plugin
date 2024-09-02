@@ -15,8 +15,8 @@ class Cppcheck < Plugin
     
     @config = @setupinator.config_hash[CPPCHECK_SYM]
     
-    evaluate_config()
     validate_enabled_reports()
+    evaluate_config()
     
     if @config[:reports].include?(CppcheckReportTypes::HTML)
       @tool_validator.validate(
@@ -76,6 +76,21 @@ class Cppcheck < Plugin
   
   private
   
+  def validate_enabled_reports(boom:false)
+    all_valid = @config[:reports].all? do |report|
+      valid = CppcheckReportTypes::is_supported?(report)
+      @loginator.log(
+        "Report '#{report}' is not supported.",
+        Verbosity::ERRORS
+      ) unless valid
+      valid
+    end
+    
+    if boom and !all_valid
+      raise CeedlingException.new("Not supported reports have been requested.")
+    end
+  end
+  
   def traverse_config_eval_strings(config)
     case config
       when String
@@ -98,21 +113,6 @@ class Cppcheck < Plugin
   def evaluate_config()
     @config.each_value do |item|
       traverse_config_eval_strings(item)
-    end
-  end
-  
-  def validate_enabled_reports(boom:false)
-    all_valid = @config[:reports].all? do |report|
-      valid = CppcheckReportTypes::is_supported?(report)
-      @loginator.log(
-        "Report '#{report}' is not supported.",
-        Verbosity::ERRORS
-      ) unless valid
-      valid
-    end
-    
-    if boom and !all_valid
-      raise CeedlingException.new("Not supported reports have been requested.")
     end
   end
   

@@ -247,7 +247,7 @@ class Cppcheck < Plugin
   end
   
   def opts_builder_text()
-    opt = [
+    opts = [
       "--output-file=#{@text_artifact_filepath}"
     ]
     

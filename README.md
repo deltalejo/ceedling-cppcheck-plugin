@@ -1,7 +1,17 @@
 # Cppcheck Ceedling Plugin
 
-Add [Ceedling](https://github.com/ThrowTheSwitch/Ceedling) task for analyzing
-code with [Cppcheck](http://cppcheck.net/).
+> ⚠️ **This repository is archived.**
+>
+> This plugin has been merged into the main [Ceedling] repository and is now
+> maintained there as a built-in plugin.
+> Please refer to that repository for the latest version, documentation, and
+> issue tracking.
+
+Add [Ceedling] task for analyzing
+code with [Cppcheck].
+
+[Ceedling]: https://github.com/ThrowTheSwitch/Ceedling
+[Cppcheck]: https://cppcheck.sourceforge.io/
 
 <!-- TOC ignore:true -->
 ## Contents
